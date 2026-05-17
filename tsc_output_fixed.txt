@@ -1,0 +1,40 @@
+﻿app/(tabs)/clients.tsx(99,7): error TS2322: Type '(text: string) => string' is not assignable to type '(v: string | null) => string'.
+  Types of parameters 'text' and 'v' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+app/(tabs)/orders.tsx(197,9): error TS2322: Type '(status: any) => void' is not assignable to type '(status: any) => Promise<void>'.
+  Type 'void' is not assignable to type 'Promise<void>'.
+app/(tabs)/products.tsx(91,7): error TS2322: Type '(text: string) => string' is not assignable to type '(v: string | null) => string'.
+  Types of parameters 'text' and 'v' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+app/clients/[id].tsx(38,82): error TS2339: Property 'name' does not exist on type 'OrderItem'.
+app/clients/[id].tsx(145,8): error TS2304: Cannot find name 'ActivityIndicator'.
+app/clients/[id].tsx(308,9): error TS2322: Type '{ label: string; onPress: () => void; variant: "danger"; icon: "trash-outline"; outline: true; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+  Property 'outline' does not exist on type 'IntrinsicAttributes & ButtonProps'.
+app/clients/new.tsx(45,13): error TS2741: Property 'assigned_salesman_id' is missing in type '{ id: string; name: string; phone: string | null; area: string | null; margin_percentage: number; total_debt: number; extra_charges: number; owner_id: string; created_at: string; latest_order: null; }' but required in type 'StoreWithLatestOrder'.
+app/clients/new.tsx(98,17): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; containerStyle: { marginBottom: number; paddingLeft: number; backgroundColor: string; }; autoFocus: true; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/clients/new.tsx(113,17): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; keyboardType: "phone-pad"; containerStyle: { marginBottom: number; paddingLeft: number; backgroundColor: string; }; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/clients/new.tsx(128,19): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; keyboardType: "decimal-pad"; containerStyle: ({ marginBottom: number; paddingLeft: number; backgroundColor: string; } | { ...; })[]; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/clients/new.tsx(141,19): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; containerStyle: { marginBottom: number; paddingLeft: number; backgroundColor: string; }; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/clients/new.tsx(155,18): error TS2304: Cannot find name 'ActivityIndicator'.
+app/orders/new.tsx(464,15): error TS2322: Type '(text: string) => string' is not assignable to type '(v: string | null) => string'.
+  Types of parameters 'text' and 'v' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+app/products/new.tsx(97,17): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; containerStyle: { marginBottom: number; paddingLeft: number; backgroundColor: string; }; autoFocus: true; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/products/new.tsx(112,21): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; containerStyle: { marginBottom: number; paddingLeft: number; backgroundColor: string; }; autoCapitalize: "none"; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/products/new.tsx(126,21): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; keyboardType: "decimal-pad"; containerStyle: ({ marginBottom: number; paddingLeft: number; backgroundColor: string; } | { ...; })[]; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/products/new.tsx(142,17): error TS2322: Type '{ value: string; onChangeText: Dispatch<SetStateAction<string>>; placeholder: string; multiline: true; numberOfLines: number; containerStyle: ({ marginBottom: number; paddingLeft: number; backgroundColor: string; } | { ...; })[]; }' is not assignable to type 'IntrinsicAttributes & InputProps'.
+  Property 'containerStyle' does not exist on type 'IntrinsicAttributes & InputProps'.
+app/products/new.tsx(156,18): error TS2304: Cannot find name 'ActivityIndicator'.
+hooks/useVoiceEngine.ts(3,10): error TS2724: '"expo-speech-recognition"' has no exported member named 'ExpoSpeechRecognition'. Did you mean 'ExpoWebSpeechRecognition'?
+hooks/useVoiceEngine.ts(61,68): error TS7006: Parameter 'event' implicitly has an 'any' type.
+hooks/useVoiceEngine.ts(73,66): error TS7006: Parameter 'event' implicitly has an 'any' type.

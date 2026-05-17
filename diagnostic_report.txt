@@ -1,0 +1,6 @@
+--- Diagnostic Report ---
+stores: Total=20, NULL owner_id=20
+materials: Total=50, NULL owner_id=50
+orders: Total=0, NULL owner_id=0
+
+Current Auth User ID: undefined

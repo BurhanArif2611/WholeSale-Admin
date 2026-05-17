@@ -1,0 +1,1 @@
+﻿__tests__/hooks.test.ts(33,10): error TS2339: Property 'fetchDeliveries' does not exist on type 'typeof import("C:/Users/neel0/Desktop/wholesale-expo/wholesale-admin/lib/api")'.

@@ -1,30 +1,58 @@
 {
   "expo": {
-    "name": "wholesale-admin",
+    "name": "WholeSale Admin",
     "slug": "wholesale-admin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "wholesale-admin",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F2F5F9"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.wholesale.admin",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow voice commands to place orders, add clients and products.",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition."
+      }
     },
     "android": {
+      "permissions": [
+        "RECORD_AUDIO",
+        "INTERNET",
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#F2F5F9"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.wholesale.admin",
+      "versionCode": 1
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-speech-recognition"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "728fd90a-889c-466c-9d89-2221e47f8ef2"
+      }
     }
   }
 }

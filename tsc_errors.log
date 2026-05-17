@@ -1,0 +1,2 @@
+﻿app/orders/new.tsx(14,24): error TS2724: '"@/hooks/useDataStore"' has no exported member named 'addOrderOptimistic'. Did you mean 'addStoreOptimistic'?
+app/products/new.tsx(15,24): error TS2305: Module '"@/hooks/useDataStore"' has no exported member 'addMaterialOptimistic'.
