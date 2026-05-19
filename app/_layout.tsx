@@ -2,7 +2,9 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet, LogBox } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { LanguageProvider } from '@/hooks/useLanguage';
+import { AppDialogProvider } from '@/lib/common/components/AppDialog';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { DatabaseProvider } from '@/hooks/useDatabase';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
@@ -36,11 +38,15 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <AuthProvider>
-        <LanguageProvider>
-          <RootLayoutNav />
-        </LanguageProvider>
+        <DatabaseProvider>
+          <LanguageProvider>
+            <AppDialogProvider>
+              <RootLayoutNav />
+            </AppDialogProvider>
+          </LanguageProvider>
+        </DatabaseProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );
@@ -51,7 +57,7 @@ export default function RootLayout() {
  * Enforces role-based access control and session management via router redirects.
  */
 function RootLayoutNav() {
-  const { session, profile, loading, hasConfirmedRole, user, isInitialized } = useAuth();
+  const { session, profile, loading, hasConfirmedRole, hasCompletedProfileSetup, user, isInitialized } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const [isReady, setIsReady] = React.useState(false);
@@ -64,38 +70,41 @@ function RootLayoutNav() {
   }, [isInitialized, isReady]);
 
   useEffect(() => {
-    // ⚡ NANO-BOOT: Only block navigation if we're not initialized yet.
     if (!isInitialized) return;
 
     const firstSegment = segments[0] as string;
-    const isAuthBypass = firstSegment === 'login' || firstSegment === 'auth-callback' || firstSegment === 'onboarding' || firstSegment === 'auth';
-    
-    // NAVIGATION GATEWAY
+    const authScreens = new Set(['login', 'auth-callback', 'onboarding', 'auth', 'profile-setup']);
+    const isAuthScreen = authScreens.has(firstSegment);
+
     if (!session) {
-      // Must be logged in to access protected routes
-      if (!isAuthBypass) {
+      if (!isAuthScreen || firstSegment === 'profile-setup') {
         router.replace('/login');
       }
-    } else {
-      // Logged in session exists
-      const hasValidProfile = profile && profile.id === user?.id && hasConfirmedRole;
-
-      if (!hasValidProfile) {
-        // Enforce onboarding/role selection if missing
-        if (firstSegment !== 'onboarding' && firstSegment !== 'auth-callback') {
-          router.replace('/onboarding');
-        }
-      } else {
-        // Fully authenticated and role-confirmed
-        // Prevent users from going back to auth screens
-        if (isAuthBypass && firstSegment !== 'auth-callback') {
-          router.replace('/(tabs)');
-        }
-      }
+      return;
     }
-  }, [session, profile, loading, hasConfirmedRole, segments, user]);
 
-  const showLoadingOverlay = loading && !session && !isInitialized;
+    const hasValidRole = !!(profile && profile.id === user?.id && hasConfirmedRole);
+
+    if (!hasValidRole) {
+      if (firstSegment !== 'onboarding' && firstSegment !== 'auth-callback') {
+        router.replace('/onboarding');
+      }
+      return;
+    }
+
+    if (!hasCompletedProfileSetup) {
+      if (firstSegment !== 'profile-setup') {
+        router.replace('/profile-setup');
+      }
+      return;
+    }
+
+    if (isAuthScreen && firstSegment !== 'auth-callback') {
+      router.replace('/(tabs)');
+    }
+  }, [isInitialized, session, profile, hasConfirmedRole, hasCompletedProfileSetup, segments, user, router]);
+
+  const showBootOverlay = !isInitialized;
     
   return (
     <View style={styles.container}>
@@ -108,25 +117,24 @@ function RootLayoutNav() {
       >
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="profile-setup" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="auth-callback" options={{ presentation: 'transparentModal' }} />
-        <Stack.Screen name="clients/new" options={{ 
-            headerShown: true, 
-            title: 'New Client', 
-            headerTintColor: Colors.white,
-            headerStyle: { backgroundColor: Colors.surface } 
-        }} />
-        <Stack.Screen name="clients/[id]" options={{ 
-            headerShown: true, 
-            title: 'Client Details', 
-            headerTintColor: Colors.white,
-            headerStyle: { backgroundColor: Colors.surface } 
-        }} />
+        <Stack.Screen name="clients/new" />
+        <Stack.Screen name="clients/[id]" />
+        <Stack.Screen name="products/new" />
+        <Stack.Screen name="products/[id]" />
+        <Stack.Screen name="orders/new" />
+        <Stack.Screen name="orders/[id]" />
+        <Stack.Screen name="categories/index" />
+        <Stack.Screen name="categories/new" />
+        <Stack.Screen name="categories/[id]" />
+        <Stack.Screen name="settings" />
       </Stack>
       
-      {showLoadingOverlay && (
+      {showBootOverlay && (
         <View style={styles.loadingOverlay}>
-           <DashboardSkeleton message={profile ? "Refreshing session..." : "Establishing connection..."} />
+           <DashboardSkeleton message="Restoring your session..." />
         </View>
       )}
     </View>

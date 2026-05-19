@@ -4,6 +4,7 @@ import { View, Text, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius, Gradients, formatCurrency } from '@/constants/theme';
+import { useLanguage } from '@/hooks/useLanguage';
 import { resolvePrice } from '@/lib/api';
 import type { Store, Material } from '@/types';
 
@@ -20,6 +21,7 @@ interface ConfirmOrderProps {
  * Allows line-by-line editing of products, quantities, and prices prior to database commit.
  */
 export const ConfirmOrder = React.memo(({ transcript, matchedStore, matchedItems, onUpdateItems, notFound = [] }: ConfirmOrderProps) => {
+  const { t } = useLanguage();
   const itemsTotal = matchedItems.reduce((s, i) => s + resolvePrice(i.material.base_price, i.quantity, matchedStore?.margin_percentage ?? 0).subtotal, 0);
   const charge     = Number(matchedStore?.extra_charges ?? 0);
   const grandTotal = itemsTotal + charge;
@@ -90,7 +92,8 @@ export const ConfirmOrder = React.memo(({ transcript, matchedStore, matchedItems
                   style={styles.itemNameInput}
                   value={item.material.name}
                   onChangeText={(v) => handleUpdateName(idx, v)}
-                  placeholder="Product name"
+                  placeholder={t('ph_product_name_row')}
+                  accessibilityLabel={t('ph_product_name')}
                 />
                 <View style={styles.qtyEditRow}>
                   <TextInput
@@ -98,6 +101,8 @@ export const ConfirmOrder = React.memo(({ transcript, matchedStore, matchedItems
                     value={item.quantity.toString()}
                     onChangeText={(v) => handleUpdateQuantity(idx, v)}
                     keyboardType="decimal-pad"
+                    placeholder={t('ph_quantity')}
+                    accessibilityLabel={t('qty_header')}
                   />
                   <Text style={styles.itemMeta}>{item.material.unit} × </Text>
                   <TextInput
@@ -105,6 +110,8 @@ export const ConfirmOrder = React.memo(({ transcript, matchedStore, matchedItems
                     value={item.material.base_price.toString()}
                     onChangeText={(v) => handleUpdatePrice(idx, v)}
                     keyboardType="decimal-pad"
+                    placeholder={t('ph_selling_price')}
+                    accessibilityLabel={t('price_header')}
                   />
                 </View>
               </View>

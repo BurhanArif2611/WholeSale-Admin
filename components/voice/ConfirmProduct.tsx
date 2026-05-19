@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius, Gradients } from '@/constants/theme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ConfirmProductProps {
   transcript: string;
@@ -16,6 +17,7 @@ interface ConfirmProductProps {
  * Allows manual adjustment of matched data before creating a new material entry.
  */
 export const ConfirmProduct = React.memo(({ transcript, productData, onUpdate }: ConfirmProductProps) => {
+  const { t } = useLanguage();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Spacing.xl }}>
       <View style={styles.transcriptBox}>
@@ -34,7 +36,8 @@ export const ConfirmProduct = React.memo(({ transcript, productData, onUpdate }:
             style={styles.dInput}
             value={productData.name}
             onChangeText={(v) => onUpdate({ name: v })}
-            placeholder="Product Name"
+            placeholder={t('ph_product_name')}
+            accessibilityLabel={t('ph_product_name')}
             placeholderTextColor={Colors.textMuted}
           />
         </View>
@@ -47,7 +50,8 @@ export const ConfirmProduct = React.memo(({ transcript, productData, onUpdate }:
             style={styles.dInput}
             value={productData.unit}
             onChangeText={(v) => onUpdate({ unit: v })}
-            placeholder="e.g. Kg, Pkt, Ltr"
+            placeholder={t('ph_unit')}
+            accessibilityLabel={t('ph_unit')}
             placeholderTextColor={Colors.textMuted}
           />
         </View>
@@ -62,7 +66,8 @@ export const ConfirmProduct = React.memo(({ transcript, productData, onUpdate }:
               style={styles.dInput}
               value={productData.price?.toString()}
               onChangeText={(v) => onUpdate({ price: parseFloat(v) || 0 })}
-              placeholder="0.00"
+              placeholder={t('ph_selling_price')}
+              accessibilityLabel={t('ph_selling_price')}
               keyboardType="decimal-pad"
               placeholderTextColor={Colors.textMuted}
             />
@@ -77,7 +82,8 @@ export const ConfirmProduct = React.memo(({ transcript, productData, onUpdate }:
             style={styles.dInput}
             value={productData.remark}
             onChangeText={(v) => onUpdate({ remark: v })}
-            placeholder="Optional remark"
+            placeholder={t('notes_placeholder')}
+            accessibilityLabel={t('notes_optional')}
             placeholderTextColor={Colors.textMuted}
           />
         </View>

@@ -214,10 +214,11 @@ export default function OrderDetailsSheet({ visible, order, onClose, onUpdateSta
                     )}
 
                     <Input 
-                        label="Date (YYYY-MM-DD)"
+                        label={t('label_date_iso')}
                         value={localDate}
                         onChangeText={setLocalDate}
-                        placeholder="2024-03-31"
+                        placeholder={t('ph_date_iso')}
+                        hint={t('ph_delivery_date')}
                     />
                   </View>
               ) : (
@@ -261,12 +262,13 @@ export default function OrderDetailsSheet({ visible, order, onClose, onUpdateSta
 
                 <View style={{ marginTop: 20 }}>
                     <Input 
-                        label="Internal Notes"
+                        label={t('label_internal_notes')}
                         value={localNotes}
                         onChangeText={setLocalNotes}
                         multiline
                         numberOfLines={2}
-                        placeholder="..."
+                        placeholder={t('ph_internal_notes')}
+                        hint={t('hint_notes')}
                     />
                 </View>
                 </>

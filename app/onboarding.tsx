@@ -8,6 +8,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { Colors, Typography, Spacing, Radius, Shadow, Gradients } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -94,6 +95,7 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
       <LinearGradient colors={Gradients.header} style={[StyleSheet.absoluteFill, { zIndex: -1 }]} />
       
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
@@ -141,7 +143,8 @@ export default function OnboardingScreen() {
 
             {showCodeInput && (
               <View style={styles.pinContainer}>
-                <Text style={styles.pinLabel}>ENTER 6-DIGIT FIRM CODE</Text>
+                <Text style={styles.pinLabel}>{t('pin_label')}</Text>
+                <Text style={styles.pinHint}>{t('hint_firm_code')}</Text>
                 <View style={styles.pinRow}>
                   {renderPinBoxes()}
                 </View>
@@ -213,7 +216,8 @@ const styles = StyleSheet.create({
   roleName: { fontSize: 22, fontWeight: '900', color: Colors.textPrimary },
   roleInfo: { fontSize: 16, color: Colors.textSecondary, marginTop: 4, lineHeight: 24 },
   pinContainer: { padding: Spacing.xl, paddingTop: 0, alignItems: 'center' },
-  pinLabel: { fontSize: 14, fontWeight: '900', color: Colors.info, letterSpacing: 1.5, marginBottom: 20 },
+  pinLabel: { fontSize: 14, fontWeight: '900', color: Colors.info, letterSpacing: 1.5, marginBottom: 8 },
+  pinHint: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, lineHeight: 18 },
   pinRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
   pinBox: { width: 40, height: 50, borderRadius: Radius.md, backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
   pinBoxFilled: { borderColor: Colors.info, backgroundColor: Colors.info + '05' },

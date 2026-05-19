@@ -180,11 +180,16 @@ export const Button = React.memo(({ label, onPress, variant = 'primary', size = 
 
 // ─── Input ────────────────────────────────────────────────────────────────────
 
-interface InputProps {
+export interface InputProps {
   label?: string;
   value: string;
   onChangeText: (v: string) => void;
   placeholder?: string;
+  hint?: string;
+  error?: string | null;
+  touched?: boolean;
+  required?: boolean;
+  disabled?: boolean;
   keyboardType?: 'default' | 'numeric' | 'phone-pad' | 'email-address' | 'decimal-pad';
   multiline?: boolean;
   numberOfLines?: number;
@@ -194,21 +199,65 @@ interface InputProps {
   icon?: keyof typeof Ionicons.glyphMap;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   maxLength?: number;
+  returnKeyType?: 'done' | 'next' | 'search' | 'send' | 'default';
+  onSubmitEditing?: () => void;
+  blurOnSubmit?: boolean;
+  accessibilityLabel?: string;
+  onBlur?: () => void;
+  onFocus?: () => void;
 }
 
-export const Input = React.memo(({ 
-  label, value, onChangeText, placeholder, keyboardType = 'default', 
-  multiline, numberOfLines, style, containerStyle, autoFocus, icon, autoCapitalize, maxLength 
+export const Input = React.memo(({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  hint,
+  error,
+  touched,
+  required,
+  disabled,
+  keyboardType = 'default',
+  multiline,
+  numberOfLines,
+  style,
+  containerStyle,
+  autoFocus,
+  icon,
+  autoCapitalize,
+  maxLength,
+  returnKeyType,
+  onSubmitEditing,
+  blurOnSubmit,
+  accessibilityLabel,
+  onBlur,
+  onFocus,
 }: InputProps) => {
+  const [focused, setFocused] = React.useState(false);
+  const showError = !!error && (touched ?? true);
+
   return (
     <View style={[styles.inputWrapper, containerStyle || style]}>
-      {label && <Text style={styles.inputLabel}>{label}</Text>}
-      <View style={styles.inputRow}>
-        {icon && (
+      {label ? (
+        <Text style={styles.inputLabel}>
+          {label}
+          {required ? <Text style={styles.requiredMark}> *</Text> : null}
+        </Text>
+      ) : null}
+      {hint && !showError ? <Text style={styles.inputHint}>{hint}</Text> : null}
+      <View
+        style={[
+          styles.inputRow,
+          focused && styles.inputRowFocused,
+          showError && styles.inputRowError,
+          disabled && styles.inputRowDisabled,
+        ]}
+      >
+        {icon ? (
           <View style={styles.inputIconBox}>
-            <Ionicons name={icon} size={18} color={Colors.textSecondary} />
+            <Ionicons name={icon} size={18} color={showError ? Colors.danger : Colors.textSecondary} />
           </View>
-        )}
+        ) : null}
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -220,42 +269,79 @@ export const Input = React.memo(({
           autoFocus={autoFocus}
           autoCapitalize={autoCapitalize}
           maxLength={maxLength}
+          editable={!disabled}
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          blurOnSubmit={blurOnSubmit}
+          accessibilityLabel={accessibilityLabel ?? label}
+          accessibilityState={{ disabled: !!disabled }}
+          onFocus={() => {
+            setFocused(true);
+            onFocus?.();
+          }}
+          onBlur={() => {
+            setFocused(false);
+            onBlur?.();
+          }}
           style={[
             styles.input,
             icon && { paddingLeft: 44 },
-            multiline && { height: (numberOfLines ?? 3) * (Typography.base + 6), textAlignVertical: 'top', paddingTop: Spacing.md },
-            Shadow.sm
+            multiline && {
+              height: (numberOfLines ?? 3) * (Typography.base + 6),
+              textAlignVertical: 'top',
+              paddingTop: Spacing.md,
+            },
+            disabled && styles.inputDisabled,
           ]}
         />
       </View>
+      {showError ? <Text style={styles.inputError}>{error}</Text> : null}
     </View>
   );
 });
 
 // ─── SearchBar ────────────────────────────────────────────────────────────────
 
-export const SearchBar = React.memo(({ value, onChangeText, placeholder = 'Search...' }: {
-  value: string; onChangeText: (v: string) => void; placeholder?: string;
+export const SearchBar = React.memo(({
+  value,
+  onChangeText,
+  placeholder = 'Search...',
+  hint,
+  accessibilityLabel,
+}: {
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder?: string;
+  hint?: string;
+  accessibilityLabel?: string;
 }) => {
+  const [focused, setFocused] = React.useState(false);
   const handleClear = React.useCallback(() => onChangeText(''), [onChangeText]);
   return (
-    <View style={[styles.searchBar, Shadow.sm]}>
-      <Ionicons name="search-outline" size={18} color={Colors.textSecondary} style={{ marginRight: Spacing.sm }} />
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.textMuted}
-        style={styles.searchInput}
-        autoCorrect={false}
-        autoCapitalize="none"
-        clearButtonMode="while-editing"
-      />
-      {value.length > 0 && (
-        <TouchableOpacity onPress={handleClear}>
-          <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
-        </TouchableOpacity>
-      )}
+    <View>
+      <View style={[styles.searchBar, Shadow.sm, focused && styles.searchBarFocused]}>
+        <Ionicons name="search-outline" size={18} color={Colors.textSecondary} style={{ marginRight: Spacing.sm }} />
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={Colors.textMuted}
+          style={styles.searchInput}
+          autoCorrect={false}
+          autoCapitalize="none"
+          returnKeyType="search"
+          clearButtonMode="while-editing"
+          accessibilityLabel={accessibilityLabel ?? placeholder}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+        {value.length > 0 && (
+          <TouchableOpacity onPress={handleClear} accessibilityLabel="Clear search">
+            <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+          </TouchableOpacity>
+        )}
+      </View>
+      {hint ? <Text style={styles.searchHint}>{hint}</Text> : null}
     </View>
   );
 });
@@ -585,30 +671,60 @@ const styles = StyleSheet.create({
     fontSize: Typography.xs,
     fontWeight: Typography.bold,
     color: Colors.textSecondary,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: Spacing.sm,
-    marginLeft: 4,
+    marginBottom: Spacing.xs,
+    letterSpacing: 0.3,
   },
-  inputRow: { position: 'relative' },
+  requiredMark: { color: Colors.danger },
+  inputHint: {
+    fontSize: Typography.xs,
+    color: Colors.textMuted,
+    marginBottom: Spacing.xs,
+    lineHeight: 18,
+  },
+  inputError: {
+    fontSize: Typography.xs,
+    color: Colors.danger,
+    marginTop: Spacing.xs,
+    fontWeight: Typography.semibold,
+  },
+  inputRow: {
+    position: 'relative',
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+  },
+  inputRowFocused: {
+    borderColor: Colors.amber,
+    borderWidth: 1.5,
+  },
+  inputRowError: {
+    borderColor: Colors.danger,
+    borderWidth: 1.5,
+  },
+  inputRowDisabled: {
+    backgroundColor: Colors.surface2,
+    opacity: 0.75,
+  },
   inputIconBox: {
     position: 'absolute',
     left: 14,
-    top: 0, bottom: 0,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
     zIndex: 1,
   },
   input: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm + 2,
-    fontSize: Typography.base,
+    fontSize: Typography.sm,
     color: Colors.textPrimary,
-    ...Shadow.sm,
+    minHeight: 48,
   },
+  inputDisabled: { color: Colors.textMuted },
 
   searchBar: {
     flexDirection: 'row',
@@ -616,13 +732,22 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-    paddingHorizontal: Spacing.lg,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
-    marginBottom: Spacing.lg,
-    ...Shadow.sm,
+    marginBottom: Spacing.xs,
   },
-  searchInput: { flex: 1, fontSize: Typography.base, color: Colors.textPrimary },
+  searchBarFocused: {
+    borderColor: Colors.amber,
+    borderWidth: 1.5,
+  },
+  searchInput: { flex: 1, fontSize: Typography.sm, color: Colors.textPrimary, minHeight: 24 },
+  searchHint: {
+    fontSize: Typography.xs,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
+  },
 
   sectionHeader: {
     flexDirection: 'row', justifyContent: 'space-between',

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Radius, formatCurrency } from '@/constants/theme';
 import { createMaterial } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { addMaterialOptimistic } from '@/hooks/useDataStore';
 import UnitPickerModal from '@/components/UnitPickerModal';
 import type { Material } from '@/types';
@@ -49,6 +50,7 @@ export const OrderItemRow = React.memo(({
   const unitPrice = Math.round((Number(row.base_price) || 0) * multiplier);
   const subtotal = unitPrice * (Number(row.quantity) || 0);
 
+  const { t } = useLanguage();
   const { profile } = useAuth();
   const ownerId = profile?.role === 'owner' ? profile?.id : profile?.owner_id;
   const [creating, setCreating] = React.useState(false);
@@ -122,7 +124,8 @@ export const OrderItemRow = React.memo(({
                         handleQuickCreate();
                       }
                     }}
-                    placeholder="Product Name..."
+                    placeholder={t('ph_product_name_row')}
+                    accessibilityLabel={t('ph_product_name')}
                     style={[styles.cellInput, { flex: 1, width: '100%' }, row.is_new && styles.highlightInput]}
                 />
                 <TouchableOpacity 
@@ -146,9 +149,10 @@ export const OrderItemRow = React.memo(({
                     <TextInput 
                         value={row.quantity} 
                         onChangeText={(v) => onUpdate(row.id, { quantity: v })} 
-                        placeholder="0"
+                        placeholder={t('ph_qty_short')}
                         keyboardType="decimal-pad"
                         style={styles.cellInput}
+                        accessibilityLabel={t('qty_header')}
                     />
                 </View>
                 <View style={{ width: 60 }}>
@@ -167,9 +171,10 @@ export const OrderItemRow = React.memo(({
                     <TextInput 
                         value={row.base_price} 
                         onChangeText={(v) => onUpdate(row.id, { base_price: v, is_new: true })} 
-                        placeholder="0"
+                        placeholder={t('ph_selling_price')}
                         keyboardType="decimal-pad"
                         style={[styles.cellInput, { textAlign: 'center' }]}
+                        accessibilityLabel={t('price_header')}
                     />
                 </View>
                 <View style={{ minWidth: 80, alignItems: 'flex-end', justifyContent: 'center', paddingTop: 14 }}>
@@ -185,7 +190,8 @@ export const OrderItemRow = React.memo(({
             <TextInput 
                 value={row.name} 
                 onChangeText={(v) => onUpdate(row.id, { name: v, material_id: undefined, is_new: true })} 
-                placeholder="..."
+                placeholder={t('ph_product_name_row')}
+                accessibilityLabel={t('ph_product_name')}
                 style={[styles.cellInput, row.is_new && { borderColor: Colors.info + '60', backgroundColor: Colors.info + '05' }]}
             />
             </View>
@@ -205,9 +211,10 @@ export const OrderItemRow = React.memo(({
             <TextInput 
                 value={row.quantity} 
                 onChangeText={(v) => onUpdate(row.id, { quantity: v })} 
-                placeholder="0"
+                placeholder={t('ph_qty_short')}
                 keyboardType="decimal-pad"
                 style={[styles.cellInput, { textAlign: 'center' }]}
+                accessibilityLabel={t('qty_header')}
             />
             </View>
 
@@ -215,7 +222,7 @@ export const OrderItemRow = React.memo(({
             <TextInput 
                 value={row.base_price} 
                 onChangeText={(v) => onUpdate(row.id, { base_price: v, is_new: true })} 
-                placeholder="0"
+                placeholder={t('ph_selling_price')}
                 keyboardType="decimal-pad"
                 style={[styles.cellInput, { textAlign: 'center' }, row.is_new && { borderColor: Colors.info + '60' }]}
             />

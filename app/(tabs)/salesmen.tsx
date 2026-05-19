@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Gradients, Layout } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { removeSalesmanFromFirm } from '@/lib/api';
 import { useDataStore } from '@/hooks/useDataStore';
@@ -110,13 +110,6 @@ export default function SalesmenScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Staff Directory</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{salesmen.length}</Text>
-          </View>
-        </View>
-        
         <View style={[styles.codeCard, Shadow.sm]}>
           <View style={{ flex: 1 }}>
             <Text style={styles.codeLabel}>Active Firm Code</Text>
@@ -159,7 +152,7 @@ export default function SalesmenScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  list: { padding: Spacing.xl },
+  list: { paddingHorizontal: Layout.screenPaddingH, paddingTop: Spacing.md, paddingBottom: Layout.screenPaddingBottom },
   card: {
     backgroundColor: Colors.white,
     borderRadius: Radius.xl,
@@ -185,12 +178,12 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', marginTop: 100, gap: Spacing.md },
   emptyText: { fontSize: 16, color: Colors.textMuted, fontWeight: '500' },
   
-  header: { padding: Spacing.xl, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.borderLight },
-  headerTop: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.lg },
-  headerTitle: { fontSize: 22, fontWeight: Typography.black, color: Colors.textPrimary },
-  badge: { backgroundColor: Colors.info, paddingHorizontal: 10, paddingVertical: 2, borderRadius: 12 },
-  badgeText: { color: Colors.white, fontSize: 12, fontWeight: Typography.black },
-  
+  header: {
+    paddingHorizontal: Layout.screenPaddingH,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.lg,
+    backgroundColor: Colors.bg,
+  },
   codeCard: { 
     flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, 
     borderRadius: Radius.xl, backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border

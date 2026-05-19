@@ -1,591 +1,494 @@
-// app/orders/new.tsx
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  View, Text, ScrollView,
-  StyleSheet, Alert, KeyboardAvoidingView, Platform, FlatList, TextInput,
-  ActivityIndicator, Modal, TouchableOpacity
+  View, Text, StyleSheet, Alert, FlatList, TouchableOpacity,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients, formatCurrency } from '@/constants/theme';
-import { createOrder, createStore } from '@/lib/api';
-import { useDataStore, addOrderOptimistic, addStoreOptimistic } from '@/hooks/useDataStore';
-import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'expo-router';
+import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
+import { FormField } from '@/lib/common/components/FormField';
+import { OrderDiscountSection } from '@/lib/common/components/OrderDiscountSection';
+import { ProductFilterBar } from '@/lib/common/components/ProductFilterBar';
+import { ProductCard } from '@/lib/common/components/ProductCard';
+import { CategoryBadge } from '@/lib/common/components/CategoryBadge';
+import { QuantitySelector } from '@/lib/common/components/QuantitySelector';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Layout } from '@/constants/theme';
+import { SearchBar, Button } from '@/components/ui';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Input, SearchBar, QuickCreateCard } from '@/components/ui';
-import { OrderItemRow, OrderRow } from '@/components/OrderItemRow';
-import type { StoreWithLatestOrder, Material, Order } from '@/types';
+import { useDatabase } from '@/hooks/useDatabase';
+import { clientRepository } from '@/lib/data/repositories/clientRepository';
+import { productRepository } from '@/lib/data/repositories/productRepository';
+import { categoryRepository } from '@/lib/data/repositories/categoryRepository';
+import { orderRepository, CreateOrderItemInput } from '@/lib/data/repositories/orderRepository';
+import {
+  cartItemCount,
+  recalcLine,
+  removeFromCart,
+  updateCartQuantity,
+  type CartLineInput,
+} from '@/lib/common/utils/cart';
+import {
+  computeCartBreakdown,
+  validateOrderDiscount,
+  type OrderDiscountType,
+} from '@/lib/common/utils/orderDiscount';
+import type { Category, Client, Product, ProductSortField, SortDirection } from '@/lib/domain/models';
 
-/**
- * NewOrderScreen - Manual Order Creation Module.
- * Two-step flow: 1. Client selection (searchable list) -> 2. Line item entry (with material suggestions).
- * Includes firm-based margin calculation for standardized billing.
- */
+const STEP_TITLES = ['select_client_step', 'select_products_step', 'order_summary_step', 'confirm_order_step'] as const;
+
+function clientDiscountToForm(client: Client): { type: OrderDiscountType; value: string } {
+  const type = client.default_discount_type ?? 'percent';
+  const val = client.default_discount_value;
+  return {
+    type,
+    value: val > 0 ? String(val) : '',
+  };
+}
+
 export default function NewOrderScreen() {
-  const { t, tData } = useLanguage();
-  const { profile } = useAuth();
   const router = useRouter();
-  const params = useLocalSearchParams<{ store_id?: string }>();
-
+  const { t } = useLanguage();
+  const { isReady } = useDatabase();
+  const [step, setStep] = useState(1);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
-  const ownerId = profile?.role === 'owner' ? profile?.id : profile?.owner_id;
-  const { stores, materials, loading, refresh } = useDataStore(ownerId);
-  const [selectedStore, setSelectedStore] = useState<StoreWithLatestOrder | null>(null);
-  const [rows, setRows] = useState<OrderRow[]>([{ id: Math.random().toString(), name: '', base_price: '', unit: 'kg', quantity: '' }]);
-  const [notes,  setNotes]  = useState('');
-  const [saving, setSaving] = useState(false);
-  const [step,   setStep]   = useState<'client' | 'items' | 'success'>('client');
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<ProductSortField>('name');
+  const [sortDir, setSortDir] = useState<SortDirection>('asc');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [cart, setCart] = useState<CartLineInput[]>([]);
+  const [paidAmount, setPaidAmount] = useState('');
+  const [paymentMode, setPaymentMode] = useState('cash');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [notes, setNotes] = useState('');
+  const [placing, setPlacing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [discountType, setDiscountType] = useState<OrderDiscountType>('percent');
+  const [discountValue, setDiscountValue] = useState('');
+  const [discountFromClient, setDiscountFromClient] = useState(false);
+  const [discountTouched, setDiscountTouched] = useState(false);
 
-  // Handle store_id from navigation params (e.g. from Client Details)
+  const loadClients = useCallback(async () => {
+    if (!isReady) return;
+    setClients(await clientRepository.findAll(search));
+  }, [isReady, search]);
+
+  const loadProducts = useCallback(async () => {
+    if (!isReady) return;
+    setLoading(true);
+    const [p, cats] = await Promise.all([
+      productRepository.findAll(search, categoryId || '', { sortBy, sortDir }),
+      categoryRepository.findAll(),
+    ]);
+    setProducts(p);
+    setCategories(cats);
+    setLoading(false);
+  }, [isReady, search, categoryId, sortBy, sortDir]);
+
   useEffect(() => {
-    if (params.store_id && stores.length > 0) {
-      const found = stores.find(st => st.id === params.store_id);
-      if (found) { setSelectedStore(found); setStep('items'); }
-    }
-  }, [params.store_id, stores]);
+    if (step === 1) void loadClients();
+    if (step === 2) void loadProducts();
+  }, [step, loadClients, loadProducts]);
 
-  const handleOneTouchCreate = async (name: string) => {
-    if (!name.trim()) return;
-    setSaving(true);
-    try {
-      if (!ownerId) throw new Error("Authentication context lost.");
-      const newStore = await createStore({ 
-        name: name.trim(),
-        margin_percentage: 0,
-        owner_id: ownerId,
-      });
-      addStoreOptimistic(newStore as StoreWithLatestOrder);
-      setSelectedStore(newStore as StoreWithLatestOrder);
-      setStep('items');
-      setSearch('');
-      void refresh(); // Background sync to replace optimistic entry
-    } catch (e: any) {
-      if (e.code === '23505') {
-        Alert.alert(t('error'), 'A client with this name already exists.');
-      } else {
-        Alert.alert(t('error'), (e as Error).message);
-      }
-    } finally {
-      setSaving(false);
-    }
+  const selectClient = (client: Client) => {
+    setSelectedClient(client);
+    const { type, value } = clientDiscountToForm(client);
+    setDiscountType(type);
+    setDiscountValue(value);
+    setDiscountFromClient(client.default_discount_value > 0);
+    setDiscountTouched(false);
   };
 
-  const addRow = useCallback(() => {
-    setRows(prev => [...prev, { id: Math.random().toString(), name: '', base_price: '', unit: 'kg', quantity: '' }]);
-  }, []);
+  const getCartQty = (productId: string) =>
+    cart.find((x) => x.product_id === productId)?.quantity ?? 0;
 
-  const updateRow = useCallback((id: string, updates: Partial<OrderRow>) => {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
-  }, []);
+  const addToCart = (product: Product) => {
+    setCart((prev) => {
+      const existing = prev.find((x) => x.product_id === product.id);
+      if (existing) {
+        return updateCartQuantity(prev, product.id, 1);
+      }
+      return [
+        ...prev,
+        recalcLine({
+          product_id: product.id,
+          product_name: product.name,
+          unit_type: product.unit_type,
+          quantity: 1,
+          unit_price: product.selling_price,
+          discount_percent: product.discount_percent,
+          tax_percent: product.tax_percent,
+        }),
+      ];
+    });
+  };
 
-  const removeRow = useCallback((id: string) => {
-    setRows(prev => prev.length > 1 ? prev.filter(r => r.id !== id) : prev);
-  }, []);
+  const changeQty = (productId: string, delta: number) => {
+    setCart((prev) => updateCartQuantity(prev, productId, delta));
+  };
 
-  const onSelectMaterial = useCallback((id: string, mat: Material) => {
-    setRows(prev => prev.map(r => r.id === id ? {
-        ...r,
-        name: mat.name,
-        base_price: mat.base_price.toString(),
-        unit: mat.unit,
-        material_id: mat.id,
-        is_new: false
-    } : r));
-  }, []);
+  const removeItem = (productId: string) => {
+    setCart((prev) => removeFromCart(prev, productId));
+  };
 
-  const marginMultiplier = useMemo(() => {
-    const margin = selectedStore?.margin_percentage ? Number(selectedStore.margin_percentage) : 0;
-    return 1 + (margin / 100);
-  }, [selectedStore]);
+  const breakdown = useMemo(() => computeCartBreakdown(cart), [cart]);
+  const discountValidation = useMemo(
+    () => validateOrderDiscount(breakdown.itemsTotal, discountType, discountValue),
+    [breakdown.itemsTotal, discountType, discountValue],
+  );
+  const orderDiscountAmount = discountValidation.amount;
+  const finalPayable = Math.max(0, breakdown.itemsTotal - orderDiscountAmount);
+  const totalItems = cartItemCount(cart);
+  const paid = parseFloat(paidAmount) || 0;
+  const remaining = Math.max(0, finalPayable - paid);
 
-  const grandTotal = useMemo(() => {
-    return rows.reduce((acc, row) => {
-      const price = Number(row.base_price) || 0;
-      const qty = Number(row.quantity) || 0;
-      return acc + (Math.round(price * marginMultiplier) * qty);
-    }, 0);
-  }, [rows, marginMultiplier]);
+  const showDiscountError = discountTouched || step >= 4;
 
-  const handleSubmit = async () => {
-    if (!selectedStore) return Alert.alert(t('required'), t('err_select_client'));
-    const validRows = rows.filter(r => r.name.trim() && Number(r.quantity) > 0);
-    if (!validRows.length) return Alert.alert(t('required'), t('err_add_product'));
+  const placeOrder = async () => {
+    if (!selectedClient || cart.length === 0) return;
+    setDiscountTouched(true);
+    if (discountValidation.error) {
+      Alert.alert(t('required'), t(discountValidation.error));
+      return;
+    }
 
-    setSaving(true);
+    setPlacing(true);
     try {
-      if (!ownerId) throw new Error("Firm owner context is missing.");
-
-      const items = validRows.map(r => ({
-        material_id: r.material_id,
-        name: r.name,
-        base_price: Number(r.base_price),
-        unit: r.unit,
-        quantity: Number(r.quantity)
-      }));
-
-      const prices = validRows.map(r => {
-        const unitPrice = Math.round(Number(r.base_price) * marginMultiplier);
-        return { 
-          unit_price: unitPrice, 
-          subtotal: unitPrice * Number(r.quantity) 
-        };
+      const items: CreateOrderItemInput[] = cart.map(({ line_total: _lt, ...rest }) => rest);
+      await orderRepository.create({
+        client_id: selectedClient.id,
+        items,
+        paid_amount: paid,
+        payment_mode: paymentMode,
+        delivery_date: deliveryDate || null,
+        notes: notes || null,
+        order_discount_type: discountValidation.value > 0 ? discountType : null,
+        order_discount_value: discountValidation.value,
+        order_discount_amount: orderDiscountAmount,
+        save_client_discount: true,
       });
-
-      const res = await createOrder(
-        { 
-          store_id: selectedStore.id, 
-          notes: notes?.trim() || null, 
-          items,
-          owner_id: ownerId
-        },
-        prices
-      );
-      
-      addOrderOptimistic({
-          ...res,
-          stores: selectedStore // linked for UI
-      } as unknown as Order);
-
-      setOrderId(res.id);
-      setStep('success');
-      void refresh(); // Full sync in background
+      Alert.alert('Success', 'Order placed successfully', [{ text: 'OK', onPress: () => router.replace('/(tabs)/orders') }]);
     } catch (e) {
       Alert.alert(t('error'), (e as Error).message);
     } finally {
-      setSaving(false);
+      setPlacing(false);
     }
   };
 
-  const filteredStores = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return stores;
-    return stores.filter((s) => {
-      const nameMatch = tData(s.name).toLowerCase().includes(q);
-      const areaMatch = (s.area || '').toLowerCase().includes(q);
-      const phoneMatch = (s.phone || '').includes(q);
-      return nameMatch || areaMatch || phoneMatch;
-    });
-  }, [stores, search, tData]);
-
-  const exactMatch = useMemo(() => 
-    filteredStores.some(s => tData(s.name).toLowerCase() === search.trim().toLowerCase()),
-  [filteredStores, search, tData]);
-
-  const renderClientStep = () => (
-    <View style={{ flex: 1 }}>
-      <Text style={styles.stepTitle}>{t('select_client_title')}</Text>
-      <View style={styles.searchContainer}>
-        <SearchBar value={search} onChangeText={setSearch} placeholder={t('search_placeholder')} />
-      </View>
-
-      <FlatList
-        data={filteredStores}
-        keyExtractor={(i) => i.id}
-        contentContainerStyle={{ paddingHorizontal: Spacing.xl, paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-        ListFooterComponent={search.trim() && !exactMatch ? (
-          <QuickCreateCard 
-            title={t('create_new_client')}
-            searchTerm={search.trim()}
-            onPress={() => handleOneTouchCreate(search.trim())}
-            loading={saving}
-          />
-        ) : null}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => { setSelectedStore(item); setStep('items'); }}
-            activeOpacity={0.8} style={[styles.clientRow, Shadow.md]}>
-            <LinearGradient colors={Gradients.amber} style={styles.rowAvatar}>
-              <Text style={styles.rowAvatarText}>{tData(item.name).charAt(0).toUpperCase()}</Text>
-            </LinearGradient>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rowName}>{tData(item.name)}</Text>
-              <View style={styles.metaRow}>
-                {item.area && <><Ionicons name="location" size={12} color={Colors.textSecondary} /><Text style={styles.rowSub}>{item.area}</Text></>}
-                {item.phone && <><Ionicons name="call" size={12} color={Colors.textSecondary} style={{ marginLeft: 10 }} /><Text style={styles.rowSub}>{item.phone}</Text></>}
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        )}
-      />
-    </View>
-  );
-
-  const renderSuccessStep = () => {
-    const validRows = rows.filter(r => r.name.trim() && Number(r.quantity) > 0);
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }]}>
-        <View style={[styles.successCard, Shadow.lg]}>
-          <LinearGradient colors={['#10B981', '#059669']} style={styles.successIconBg}>
-            <Ionicons name="checkmark-done" size={60} color={Colors.white} />
-          </LinearGradient>
-          
-          <Text style={styles.successTitle}>{t('done')}</Text>
-          <Text style={styles.successSub}>{t('order_placed_msg')}</Text>
-          
-          <View style={styles.successDetailRow}>
-            <Text style={styles.successDetailLabel}>{t('order_number')}</Text>
-            <Text style={styles.successDetailValue}>{orderId?.slice(0, 8).toUpperCase()}</Text>
-          </View>
-
-          <View style={[styles.successDetailRow, { borderBottomWidth: 0, paddingBottom: 4 }]}>
-            <Text style={[styles.successDetailLabel, { fontWeight: Typography.bold, color: Colors.textPrimary }]}>
-              {t('items_label')}
-            </Text>
-          </View>
-
-          <View style={styles.successItemsContainer}>
-            <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
-              {validRows.map((item, idx) => {
-                const itemPrice = Math.round((Number(item.base_price) || 0) * marginMultiplier);
-                const subtotal = itemPrice * (Number(item.quantity) || 0);
-                return (
-                  <View key={item.id} style={[styles.successItemRow, idx === 0 && { borderTopWidth: 0 }]}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.successItemName} numberOfLines={1}>{item.name}</Text>
-                      <Text style={styles.successItemQty}>{item.quantity} {item.unit} × {formatCurrency(itemPrice)}</Text>
-                    </View>
-                    <Text style={styles.successItemTotal}>{formatCurrency(subtotal)}</Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          </View>
-
-          <View style={[styles.successDetailRow, { borderTopWidth: 1, borderTopColor: Colors.borderLight, marginTop: 10 }]}>
-            <Text style={[styles.successDetailLabel, { fontWeight: Typography.bold, color: Colors.textPrimary }]}>
-              {t('grand_total_label')}
-            </Text>
-            <Text style={[styles.successDetailValue, { color: Colors.amber, fontSize: Typography.md }]}>
-              {formatCurrency(grandTotal)}
-            </Text>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.successButtonPrimary} 
-            onPress={() => router.replace('/(tabs)/orders')}
-          >
-            <Text style={styles.successButtonTextPrimary}>{t('view_orders')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.successButtonSecondary} 
-            onPress={() => {
-              setRows([{ id: Math.random().toString(), name: '', base_price: '', unit: 'kg', quantity: '' }]);
-              setNotes('');
-              setStep('client');
-              setOrderId(null);
-              setSelectedStore(null);
-            }}
-          >
-            <Text style={styles.successButtonTextSecondary}>{t('new_order')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1);
+    else router.back();
   };
 
-  const renderItemsStep = () => (
-    <>
-      <View style={[styles.clientBanner, Shadow.md]}>
-        <View style={styles.bannerIconBg}>
-          <Ionicons name="storefront-outline" size={20} color={Colors.amber} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.bannerLabel}>{t('selected_client_label') || 'SELECTED CLIENT'}</Text>
-          <Text style={styles.clientBannerName}>{tData(selectedStore?.name ?? '')}</Text>
-        </View>
-        <TouchableOpacity onPress={() => setStep('client')} style={styles.changeBtnTouch}>
-          <Text style={styles.changeBtn}>{t('change_btn')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.tableHeader}>
-        <Text style={[styles.headerCell, { flex: 1 }]}>{t('product_name_header') || 'Product'}</Text>
-        <Text style={[styles.headerCell, { width: 45, textAlign: 'center' }]}>{t('unit') || 'Unit'}</Text>
-        <Text style={[styles.headerCell, { width: 40, textAlign: 'center' }]}>{t('qty_header') || 'Qty'}</Text>
-        <Text style={[styles.headerCell, { width: 70, textAlign: 'center' }]}>{t('price_header') || 'Price'}</Text>
-        <Text style={[styles.headerCell, { minWidth: 90, textAlign: 'right', paddingRight: 32 }]}>{t('total_header') || 'Total'}</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
-        {rows.map((row, index) => (
-          <OrderItemRow 
-            key={row.id}
-            row={row}
-            index={index}
-            isLast={rows.length === 1}
-            materials={materials}
-            multiplier={marginMultiplier}
-            onUpdate={updateRow}
-            onRemove={removeRow}
-            onSelectMaterial={onSelectMaterial}
-            tData={tData}
-          />
-        ))}
-
-        <TouchableOpacity onPress={addRow} style={styles.addRowContainer} activeOpacity={0.7}>
-          <View style={styles.plusCircle}>
-             <Ionicons name="add" size={20} color={Colors.white} />
-          </View>
-          <Text style={styles.addRowLink}>{t('add_more_product')}</Text>
-        </TouchableOpacity>
-
-        <View style={{ paddingHorizontal: Spacing.xl, marginTop: 25 }}>
-           <Text style={styles.notesLabel}>{t('notes_optional')}</Text>
-           <TextInput 
-              value={notes} 
-              onChangeText={setNotes}
-              placeholder={t('notes_placeholder')}
-              multiline
-              numberOfLines={2}
-              style={styles.notesInput}
-           />
-        </View>
-      </ScrollView>
-
-      <View style={[styles.bottomBar, Shadow.lg]}>
-        <View>
-          <Text style={styles.bottomLabel}>{t('grand_total_label')}</Text>
-          <Text style={styles.bottomTotal}>{formatCurrency(grandTotal)}</Text>
-        </View>
-        <TouchableOpacity onPress={handleSubmit} disabled={saving} activeOpacity={0.85}>
-          <LinearGradient colors={saving ? [Colors.border, Colors.border] : Gradients.amber}
-            style={styles.nextBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-            {saving ? (
-              <ActivityIndicator size="small" color={Colors.white} style={{ marginRight: 8 }} />
-            ) : (
-              <Ionicons name="cart-outline" size={18} color={Colors.white} style={{ marginRight: 8 }} />
-            )}
-            <Text style={styles.nextBtnText}>
-              {saving ? t('saving_btn') : t('place_order_btn')}
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-    </>
-  );
+  const headerTitle = `${t('new_order_title')} · ${t(STEP_TITLES[step - 1])}`;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.container}>
-        {step === 'client' && renderClientStep()}
-        {step === 'items' && renderItemsStep()}
-        {step === 'success' && renderSuccessStep()}
+    <ScreenLayout
+      title={headerTitle}
+      onBack={handleBack}
+      scroll={step >= 3}
+      padded={step >= 3}
+      footer={
+        step === 2 ? (
+          <View style={styles.footer}>
+            <Text style={styles.cartCount}>
+              {totalItems} items · {formatCurrency(breakdown.itemsTotal)}
+            </Text>
+            <Button label="Next: Summary" onPress={() => setStep(3)} disabled={cart.length === 0} />
+          </View>
+        ) : undefined
+      }
+    >
+      <View style={styles.steps}>
+        {[1, 2, 3, 4].map((s) => (
+          <View key={s} style={[styles.stepDot, step >= s && styles.stepDotActive]} />
+        ))}
       </View>
-    </KeyboardAvoidingView>
+
+      {step === 1 && (
+        <View style={styles.stepContent}>
+          <View style={styles.searchWrap}>
+            <SearchBar
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('search_clients')}
+              accessibilityLabel={t('search_clients')}
+            />
+          </View>
+          <FlatList
+            data={clients}
+            keyExtractor={(c) => c.id}
+            contentContainerStyle={styles.listPad}
+            ListEmptyComponent={<Text style={styles.emptyHint}>No clients found</Text>}
+            renderItem={({ item: c }) => (
+              <TouchableOpacity
+                style={[styles.row, selectedClient?.id === c.id && styles.rowSelected]}
+                onPress={() => selectClient(c)}
+              >
+                <Text style={styles.rowTitle}>{c.name}</Text>
+                <Text style={styles.rowMeta}>{c.mobile}</Text>
+                {c.default_discount_value > 0 && c.default_discount_type ? (
+                  <Text style={styles.discountBadge}>
+                    {c.default_discount_type === 'percent'
+                      ? `${c.default_discount_value}% ${t('discount_label')}`
+                      : `${formatCurrency(c.default_discount_value)} ${t('discount_label')}`}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
+            )}
+          />
+          <View style={styles.stepFooter}>
+            <Button label="Next: Add Products" onPress={() => { setSearch(''); setStep(2); }} disabled={!selectedClient} />
+          </View>
+        </View>
+      )}
+
+      {step === 2 && (
+        <View style={styles.stepContent}>
+          <View style={styles.filterWrap}>
+            <ProductFilterBar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder={t('search_products')}
+              categories={categories}
+              selectedCategoryId={categoryId}
+              onCategorySelect={setCategoryId}
+              sortBy={sortBy}
+              sortDir={sortDir}
+              onSortChange={(f, d) => { setSortBy(f); setSortDir(d); }}
+            />
+          </View>
+          <FlatList
+            data={products}
+            keyExtractor={(p) => p.id}
+            contentContainerStyle={styles.listPad}
+            refreshing={loading}
+            onRefresh={loadProducts}
+            ListEmptyComponent={<Text style={styles.emptyHint}>No products match your search</Text>}
+            renderItem={({ item }) => {
+              const qty = getCartQty(item.id);
+              return (
+                <ProductCard
+                  product={item}
+                  cartQty={qty}
+                  onAdd={() => addToCart(item)}
+                  onQtyChange={(delta) => changeQty(item.id, delta)}
+                  onRemove={() => removeItem(item.id)}
+                />
+              );
+            }}
+          />
+        </View>
+      )}
+
+      {step === 3 && (
+        <>
+          {selectedClient ? (
+            <Text style={styles.clientBanner}>{selectedClient.name}</Text>
+          ) : null}
+          {cart.map((item) => (
+            <View key={item.product_id} style={styles.cartRow}>
+              <View style={styles.cartInfo}>
+                <Text style={styles.rowTitle}>{item.product_name}</Text>
+                {products.find((p) => p.id === item.product_id) && (
+                  <CategoryBadge
+                    name={products.find((p) => p.id === item.product_id)!.category}
+                    compact
+                  />
+                )}
+                <Text style={styles.rowMeta}>
+                  {formatCurrency(item.unit_price)}/{item.unit_type}
+                </Text>
+                <Text style={styles.rowAmt}>{formatCurrency(item.line_total)}</Text>
+              </View>
+              <QuantitySelector
+                value={item.quantity}
+                onChange={(delta) => changeQty(item.product_id, delta)}
+                onRemove={() => removeItem(item.product_id)}
+              />
+            </View>
+          ))}
+
+          <OrderDiscountSection
+            type={discountType}
+            onTypeChange={(type) => {
+              setDiscountType(type);
+              setDiscountFromClient(false);
+              setDiscountTouched(true);
+            }}
+            value={discountValue}
+            onValueChange={(v) => {
+              setDiscountValue(v);
+              setDiscountFromClient(false);
+              setDiscountTouched(true);
+            }}
+            errorKey={showDiscountError ? discountValidation.error : null}
+            t={t}
+            itemsTotal={breakdown.itemsTotal}
+            discountAmount={orderDiscountAmount}
+            finalPayable={finalPayable}
+            fromClientHint={discountFromClient && discountValidation.value > 0}
+          />
+
+          <View style={styles.summaryBox}>
+            <SummaryRow label={t('subtotal_label')} value={formatCurrency(breakdown.subtotal)} />
+            {breakdown.lineDiscount > 0 ? (
+              <SummaryRow label={t('order_product_discount')} value={`−${formatCurrency(breakdown.lineDiscount)}`} />
+            ) : null}
+            {breakdown.taxTotal > 0 ? (
+              <SummaryRow label="Tax" value={formatCurrency(breakdown.taxTotal)} />
+            ) : null}
+            <SummaryRow label={t('order_items_total')} value={formatCurrency(breakdown.itemsTotal)} />
+            {orderDiscountAmount > 0 ? (
+              <SummaryRow label={t('order_client_discount')} value={`−${formatCurrency(orderDiscountAmount)}`} />
+            ) : null}
+            <SummaryRow label={t('grand_total_label')} value={formatCurrency(finalPayable)} bold />
+          </View>
+
+          <FormField
+            label="Paid Amount"
+            value={paidAmount}
+            onChangeText={setPaidAmount}
+            placeholder={t('ph_paid_amount')}
+            hint={t('hint_paid_amount')}
+            keyboardType="numeric"
+          />
+          <FormField
+            label="Payment Mode"
+            value={paymentMode}
+            onChangeText={setPaymentMode}
+            placeholder={t('ph_payment_mode')}
+            hint={t('hint_payment_mode')}
+          />
+          <FormField
+            label="Delivery Date"
+            value={deliveryDate}
+            onChangeText={setDeliveryDate}
+            placeholder={t('ph_delivery_date')}
+          />
+          <FormField
+            label={t('notes_optional')}
+            value={notes}
+            onChangeText={setNotes}
+            placeholder={t('notes_placeholder')}
+            hint={t('hint_notes')}
+            multiline
+            numberOfLines={3}
+          />
+          <Text style={styles.remaining}>Remaining: {formatCurrency(remaining)}</Text>
+          <Button
+            label="Review & Place"
+            onPress={() => {
+              setDiscountTouched(true);
+              if (discountValidation.error) {
+                Alert.alert(t('required'), t(discountValidation.error));
+                return;
+              }
+              setStep(4);
+            }}
+            disabled={cart.length === 0}
+          />
+        </>
+      )}
+
+      {step === 4 && (
+        <>
+          <Text style={styles.confirmText}>Client: {selectedClient?.name}</Text>
+          <Text style={styles.confirmText}>Items: {totalItems} ({cart.length} products)</Text>
+          <Text style={styles.confirmText}>Items total: {formatCurrency(breakdown.itemsTotal)}</Text>
+          {orderDiscountAmount > 0 ? (
+            <Text style={styles.confirmText}>
+              {t('order_client_discount')}: −{formatCurrency(orderDiscountAmount)}
+              {discountType === 'percent' ? ` (${discountValidation.value}%)` : ''}
+            </Text>
+          ) : null}
+          <Text style={styles.confirmText}>Total: {formatCurrency(finalPayable)}</Text>
+          <Text style={styles.confirmText}>Paid: {formatCurrency(paid)}</Text>
+          <Text style={styles.confirmText}>Due: {formatCurrency(remaining)}</Text>
+          <Button label={placing ? 'Placing...' : 'Place Order'} onPress={placeOrder} loading={placing} disabled={cart.length === 0} />
+          <Button label={t('go_back')} onPress={() => setStep(3)} variant="ghost" style={{ marginTop: Spacing.sm }} />
+        </>
+      )}
+    </ScreenLayout>
+  );
+}
+
+function SummaryRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <View style={styles.summaryRow}>
+      <Text style={{ color: Colors.textSecondary }}>{label}</Text>
+      <Text style={{ fontWeight: bold ? Typography.bold : Typography.semibold, color: Colors.textPrimary }}>{value}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
-  searchContainer: { paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md },
-  stepTitle: {
-    fontSize: Typography.lg, fontWeight: Typography.black,
-    color: Colors.textPrimary, padding: Spacing.xl, paddingBottom: Spacing.md,
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Layout.screenPaddingH,
   },
-  clientRow: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    borderRadius: Radius.xl, padding: Spacing.lg, marginBottom: Spacing.md,
-    backgroundColor: Colors.white, ...Shadow.sm,
+  stepDot: { width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.border },
+  stepDotActive: { backgroundColor: Colors.amber },
+  stepContent: { flex: 1 },
+  searchWrap: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: Spacing.sm },
+  filterWrap: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: Spacing.sm },
+  listPad: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: 120 },
+  row: {
+    flexDirection: 'column',
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.sm,
   },
-  rowAvatar: { width: 44, height: 44, borderRadius: Radius.lg, alignItems: 'center', justifyContent: 'center' },
-  rowAvatarText: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.white },
-  rowName: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary },
-  rowSub:  { fontSize: 13, color: Colors.textSecondary },
-
+  rowSelected: { borderWidth: 2, borderColor: Colors.amber },
+  rowTitle: { fontWeight: Typography.bold, color: Colors.textPrimary },
+  rowMeta: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
+  discountBadge: { fontSize: Typography.xs, color: Colors.success, fontWeight: Typography.semibold, marginTop: 4 },
+  rowAmt: { fontWeight: Typography.bold, color: Colors.amber, marginTop: 4 },
   clientBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    padding: Spacing.md, marginHorizontal: Spacing.xl, marginBottom: Spacing.lg,
-    marginTop: 20,
-    borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.amber + '30', backgroundColor: Colors.white,
-  },
-  bannerIconBg: { width: 36, height: 36, borderRadius: 10, backgroundColor: Colors.amber + '10', alignItems: 'center', justifyContent: 'center' },
-  bannerLabel: { fontSize: 9, fontWeight: '900', color: Colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 },
-  clientBannerName: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary },
-  changeBtnTouch: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.md, backgroundColor: Colors.bg },
-  changeBtn: { fontSize: 12, color: Colors.amber, fontWeight: Typography.black },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-
-  tableHeader: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    backgroundColor: 'rgba(0,0,0,0.02)',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    marginBottom: 4,
-  },
-  headerCell: {
-    fontSize: 10,
-    fontWeight: Typography.black,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.03)',
-  },
-  tableRowAlt: {
-    backgroundColor: 'rgba(255, 191, 0, 0.02)',
-  },
-  cellInput: {
-    fontSize: 13,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    backgroundColor: Colors.white,
-    borderRadius: Radius.md,
-    height: 40,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginHorizontal: 2,
+    fontSize: Typography.sm,
+    fontWeight: Typography.bold,
     color: Colors.textPrimary,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
   },
-  subtotalText: {
-    fontSize: 13,
-    fontWeight: Typography.black,
-    color: Colors.textPrimary,
-    marginRight: 4,
-  },
-  inlineRemoveBtn: { padding: 4 },
-  tableSuggestions: {
-    position: 'absolute',
-    top: 48,
-    left: Spacing.lg,
-    right: Spacing.lg,
-    backgroundColor: Colors.white,
-    borderRadius: Radius.md,
-    zIndex: 1000,
-    ...Shadow.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  suggestionItem: {
-    padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  suggestionText: { fontSize: 13, color: Colors.textPrimary },
-  addRowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.lg,
-    gap: Spacing.sm,
-    backgroundColor: Colors.amber + '05',
-    paddingVertical: Spacing.md,
-    marginHorizontal: Spacing.xl,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.amber + '20',
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-  },
-  plusCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.amber,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addRowLink: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.amber },
-  notesLabel: { fontSize: 11, fontWeight: '900', color: Colors.textMuted, textTransform: 'uppercase', marginBottom: 6 },
-  notesInput: {
-    backgroundColor: Colors.white,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    height: 60,
-    textAlignVertical: 'top',
-    fontSize: 13,
-  },
-  bottomBar: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg,
-    backgroundColor: Colors.white, borderTopWidth: 1, borderTopColor: Colors.border,
-    ...Shadow.lg,
-  },
-  bottomLabel: { fontSize: 10, fontWeight: '900', color: Colors.textMuted, textTransform: 'uppercase' },
-  bottomTotal: { fontSize: 24, fontWeight: Typography.black, color: Colors.amber },
-  nextBtn: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 24, paddingVertical: 14, borderRadius: Radius.lg,
-    ...Shadow.sm,
-  },
-  nextBtnText: { fontSize: Typography.base, fontWeight: Typography.black, color: Colors.white },
-  
-  successCard: {
-    backgroundColor: Colors.white,
-    borderRadius: Radius.xxl,
-    padding: 30,
-    width: '100%',
-    alignItems: 'center',
-    ...Shadow.lg,
-  },
-  successIconBg: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    ...Shadow.sm,
-  },
-  successTitle: { fontSize: 26, fontWeight: Typography.black, color: Colors.textPrimary, marginBottom: 8 },
-  successSub: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', marginBottom: 30, lineHeight: 22 },
-  successDetailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  successDetailLabel: { fontSize: 13, color: Colors.textSecondary },
-  successDetailValue: { fontSize: 13, fontWeight: Typography.bold, color: Colors.textPrimary },
-  successButtonPrimary: {
-    backgroundColor: Colors.amber,
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: Radius.xl,
-    alignItems: 'center',
-    marginTop: 30,
-    ...Shadow.sm,
-  },
-  successButtonTextPrimary: { color: Colors.white, fontSize: 15, fontWeight: Typography.black },
-  successButtonSecondary: { width: '100%', paddingVertical: 16, alignItems: 'center', marginTop: 10 },
-  successButtonTextSecondary: { color: Colors.textSecondary, fontSize: 13, fontWeight: '700' },
-  successItemsContainer: {
-    width: '100%',
-    marginVertical: 10,
-    backgroundColor: Colors.bg,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  successItemRow: {
+  cartRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  cartInfo: { flex: 1, paddingRight: Spacing.md },
+  stepFooter: { padding: Layout.screenPaddingH, paddingBottom: Spacing.lg },
+  footer: {
+    padding: Layout.screenPaddingH,
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
-  successItemName: { fontSize: 14, fontWeight: Typography.bold, color: Colors.textPrimary },
-  successItemQty: { fontSize: 11, color: Colors.textSecondary, marginTop: 2 },
-  successItemTotal: { fontSize: 14, fontWeight: Typography.black, color: Colors.textPrimary },
-
-  modalSubmitBtn: { marginTop: Spacing.lg, borderRadius: Radius.lg, overflow: 'hidden' },
-  modalSubmitGradient: { paddingVertical: Spacing.md, alignItems: 'center', justifyContent: 'center' },
-  modalSubmitText: { color: Colors.white, fontSize: Typography.base, fontWeight: Typography.bold },
+  cartCount: { textAlign: 'center', marginBottom: Spacing.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  summaryBox: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    marginVertical: Spacing.md,
+  },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  remaining: {
+    fontWeight: Typography.bold,
+    color: Colors.danger,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+    fontSize: Typography.sm,
+  },
+  confirmText: { fontSize: Typography.sm, color: Colors.textPrimary, marginBottom: 8 },
+  emptyHint: { textAlign: 'center', color: Colors.textMuted, padding: Spacing.xl },
 });

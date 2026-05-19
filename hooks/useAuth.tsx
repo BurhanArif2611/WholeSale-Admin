@@ -4,12 +4,47 @@ import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 import { supabase } from '@/lib/supabase';
 import { fetchProfile, createProfile, fetchOwnerByFirmCode } from '@/lib/api';
+import { updateProfile } from '@/lib/api/profiles';
 import { Profile, UserRole } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { clearCache } from './useDataStore';
+import {
+  type UserProfileData,
+  saveUserProfile,
+  isProfileSetupComplete,
+  markProfileSetupComplete,
+  clearUserProfileStorage,
+} from '@/lib/auth/userProfile';
+import { normalizeMobile } from '@/lib/common/utils/validation';
+import {
+  saveDevSession,
+  loadDevSession,
+  clearDevSession,
+  isDevBypassSession,
+} from '@/lib/auth/sessionStorage';
 
 const PROFILE_CACHE_KEY = 'wholesale_profile_cache';
+
+async function recoverStoredSession(): Promise<{ session: Session | null; user: User | null }> {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (!error && session?.user) {
+      console.log('[useAuth] Supabase session restored');
+      return { session, user: session.user };
+    }
+  } catch (e) {
+    console.warn('[useAuth] Supabase getSession failed:', e);
+  }
+
+  const dev = await loadDevSession();
+  if (dev?.session?.user) {
+    console.log('[useAuth] Dev session restored from storage');
+    return { session: dev.session, user: dev.user };
+  }
+
+  return { session: null, user: null };
+}
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,8 +63,12 @@ interface AuthContextType {
   resolveSalesmanFirm: (code: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   hasConfirmedRole: boolean;
+  hasCompletedProfileSetup: boolean;
   confirmRole: () => void;
-  devBypassLogin: (email: string) => void;
+  completeProfileSetup: (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => Promise<void>;
+  updateUserProfile: (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => Promise<void>;
+  refreshProfileSetupStatus: () => Promise<void>;
+  devBypassLogin: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasConfirmedRole, setHasConfirmedRole] = useState(false);
+  const [hasCompletedProfileSetup, setHasCompletedProfileSetup] = useState(false);
   const isUpdatingRef = React.useRef(false);
   const syncInProgressRef = React.useRef<string | null>(null);
   const lastSessionUserIdRef = React.useRef<string | null>(null);
@@ -59,139 +99,136 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    
-    // CONSOLIDATED INITIALIZATION: Cache -> Session -> Listener
+    let bootFinished = false;
+
+    const finishBoot = () => {
+      if (!isMounted || bootFinished) return;
+      bootFinished = true;
+      setIsInitialized(true);
+      setLoading(false);
+    };
+
+    const applySession = (nextSession: Session | null, nextUser: User | null) => {
+      setSession(nextSession);
+      setUser(nextUser);
+      if (nextUser) lastSessionUserIdRef.current = nextUser.id;
+    };
+
     const initializeAuth = async () => {
       const start = Date.now();
-      console.log('[useAuth] ⚡ Boot sequence initiated...');
+      console.log('[useAuth] Boot: restoring cache and session...');
 
       try {
-        // 1. Recover Cache (EXTREMELY FAST ~50ms)
         const cachedProfileStr = await AsyncStorage.getItem(PROFILE_CACHE_KEY);
         let localProfile: Profile | null = null;
-        
-        if (isMounted && cachedProfileStr) {
-          localProfile = JSON.parse(cachedProfileStr);
-          console.log('[useAuth] 💾 Disk cache found:', localProfile?.role);
+
+        if (cachedProfileStr) {
+          localProfile = JSON.parse(cachedProfileStr) as Profile;
+          console.log('[useAuth] Profile cache:', localProfile?.role ?? 'no role');
           setProfileState(localProfile);
           if (localProfile?.role) setHasConfirmedRole(true);
-        }
-
-        // 2. IMMEDIATE UNLOCK: Unblock the Splash Screen AS SOON AS cache is ready
-        if (isMounted) {
-           console.log('[useAuth] ⚡ Releasing UI lock (Zero-Wait)...');
-           setIsInitialized(true); 
-           setLoading(false); 
-        }
-
-        // 3. BACKGROUND HANDSHAKE: Verify session after UI is unlocked
-        void (async () => {
-          const timeoutDuration = 12000; // Increased to 12s for mobile dev networks
-          const sessionTimeout = new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('Session recovery timeout')), timeoutDuration)
-          );
-          
-          try {
-            const hasEnv = !!process.env.EXPO_PUBLIC_SUPABASE_URL;
-            console.log(`[useAuth] 🛰️ Background handshake initiated... (timeout: ${timeoutDuration}ms, env: ${hasEnv ? 'OK' : 'MISSING'})`);
-            
-            const sessionResult = await Promise.race([
-              supabase.auth.getSession(),
-              sessionTimeout
-            ]) as any;
-            const initialSession = sessionResult?.data?.session ?? null;
-            
-            if (isMounted) {
-              setSession(initialSession);
-              const currentUser = initialSession?.user ?? null;
-              setUser(currentUser);
-              
-              if (currentUser) {
-                 const isCacheValid = !!(localProfile && localProfile.id === currentUser.id);
-                 void syncProfile(currentUser.id, 3, 1000, isCacheValid);
-              }
-              console.log('[useAuth] 🛡️ Handshake complete.');
-            }
-          } catch (e) {
-            console.warn('[useAuth] 🛡️ Background handshake failed:', (e as Error).message);
+          if (localProfile?.id) {
+            const setupDone = await isProfileSetupComplete(localProfile.id);
+            if (isMounted) setHasCompletedProfileSetup(setupDone);
           }
-        })();
-
-      } catch (e) {
-        console.warn('[useAuth] ❌ Boot encounter serious error:', e);
-        if (isMounted) {
-           setLoading(false);
-           setIsInitialized(true);
         }
+
+        const { session: restoredSession, user: restoredUser } = await recoverStoredSession();
+        if (!isMounted) return;
+
+        applySession(restoredSession, restoredUser);
+
+        if (restoredUser) {
+          const cacheValid = !!(localProfile && localProfile.id === restoredUser.id);
+
+          if (isDevBypassSession(restoredSession)) {
+            if (!cacheValid) {
+              setProfile({
+                id: restoredUser.id,
+                role: 'owner',
+                owner_id: restoredUser.id,
+                full_name: restoredUser.email?.split('@')[0] || 'Dev User',
+                phone: null,
+                created_at: new Date().toISOString(),
+              });
+              setHasConfirmedRole(true);
+            }
+            const setupDone = await isProfileSetupComplete(restoredUser.id);
+            if (isMounted) setHasCompletedProfileSetup(setupDone);
+          } else {
+            void syncProfile(restoredUser.id, 3, 1000, cacheValid);
+          }
+        } else if (localProfile) {
+          setProfileState(null);
+          setHasConfirmedRole(false);
+          setHasCompletedProfileSetup(false);
+          AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
+        }
+
+        console.log('[useAuth] Boot complete:', restoredUser ? 'signed in' : 'signed out');
+      } catch (e) {
+        console.warn('[useAuth] Boot error:', e);
       } finally {
-        console.log(`[useAuth] ⏱️ Core boot sequence finished in ${Date.now() - start}ms`);
+        console.log(`[useAuth] Boot finished in ${Date.now() - start}ms`);
+        finishBoot();
       }
     };
 
-    initializeAuth();
+    let subscription: { unsubscribe: () => void } | undefined;
 
-    // AUTH STATE LISTNER: Handle future changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log(`[useAuth] 🛰️ Auth Event: ${event}`, { userId: newSession?.user?.id });
-      
+    void (async () => {
+      await initializeAuth();
       if (!isMounted) return;
 
-      const newUser = newSession?.user ?? null;
-      
-      // Update session and user immediately
-      setSession(newSession);
-      setUser(newUser);
-      
-      if (event === 'SIGNED_IN' && newUser) {
-        const isNewUser = newUser.id !== lastSessionUserIdRef.current;
-        if (isNewUser) {
-          console.log('[useAuth] 🆕 New user login detected');
+      const { data } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+        if (!isMounted) return;
+        if (event === 'INITIAL_SESSION') return;
+
+        const activeDev = await loadDevSession();
+        if (activeDev && event !== 'SIGNED_OUT') return;
+
+        console.log(`[useAuth] Auth event: ${event}`, { userId: newSession?.user?.id });
+
+        const newUser = newSession?.user ?? null;
+        setSession(newSession);
+        setUser(newUser);
+
+        if (event === 'SIGNED_IN' && newUser) {
           lastSessionUserIdRef.current = newUser.id;
-          // Only reset if we don't have a matching profile in state already
-          if (profile?.id !== newUser.id) {
-            setHasConfirmedRole(false);
-            setProfileState(null);
-          }
+          void syncProfile(newUser.id, 3, 1000, profile?.id === newUser.id);
+        } else if (event === 'SIGNED_OUT') {
+          lastSessionUserIdRef.current = null;
+          setProfileState(null);
+          setHasConfirmedRole(false);
+          setHasCompletedProfileSetup(false);
+          void clearDevSession();
+          AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
+        } else if (event === 'USER_UPDATED' && newUser) {
+          void syncProfile(newUser.id);
         }
-        void syncProfile(newUser.id, 3, 1000, profile?.id === newUser.id);
-      } else if (event === 'SIGNED_OUT') {
-        console.log('[useAuth] 🚪 User signed out');
-        lastSessionUserIdRef.current = null;
-        setProfileState(null);
-        setHasConfirmedRole(false);
-        setLoading(false);
-      } else if (event === 'USER_UPDATED' && newUser) {
-        void syncProfile(newUser.id);
-      }
-    });
+      });
+      subscription = data.subscription;
+    })();
 
     const watchdog = setTimeout(() => {
-      if (isMounted) {
-        setLoading(current => {
-          if (current) {
-            console.warn('[useAuth] 🛡️ Watchdog: Force-releasing stuck loading');
-            return false;
-          }
-          return current;
-        });
-        setIsInitialized(current => {
-          if (!current) {
-            console.warn('[useAuth] 🛡️ Watchdog: Force-releasing stuck initialization');
-            return true;
-          }
-          return current;
-        });
+      if (isMounted && !bootFinished) {
+        console.warn('[useAuth] Boot watchdog: forcing init complete');
+        finishBoot();
       }
-    }, 5000);
+    }, 10000);
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
       clearTimeout(watchdog);
     };
   }, []);
 
   const syncProfile = async (userId: string, retries = 3, delay = 1000, isAlreadyHydrated = false) => {
+    if (userId.startsWith('00000000')) {
+      syncInProgressRef.current = null;
+      return;
+    }
     if (isUpdatingRef.current) return;
     if (syncInProgressRef.current === userId) return;
     
@@ -223,6 +260,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('[useAuth] syncProfile success:', p.role);
         setProfile(p);
         if (p.role) setHasConfirmedRole(true);
+        void refreshProfileSetupStatus(userId);
       } else {
         console.log('[useAuth] No profile found, will create on role selection');
         setProfile(null);
@@ -252,6 +290,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshProfile = useCallback(async () => {
     if (user?.id) await syncProfile(user.id);
   }, [user]);
+
+  const refreshProfileSetupStatus = useCallback(async (userId?: string) => {
+    const id = userId ?? user?.id;
+    if (!id) {
+      setHasCompletedProfileSetup(false);
+      return;
+    }
+    const done = await isProfileSetupComplete(id);
+    setHasCompletedProfileSetup(done);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) void refreshProfileSetupStatus(user.id);
+  }, [user?.id, refreshProfileSetupStatus]);
+
+  const persistUserProfile = useCallback(
+    async (data: Omit<UserProfileData, 'completedAt'>, markComplete: boolean) => {
+      if (!user?.id) throw new Error('Not signed in');
+      const payload: UserProfileData = {
+        ...data,
+        userId: user.id,
+        phone: normalizeMobile(data.phone),
+        completedAt: markComplete ? new Date().toISOString() : null,
+      };
+      await saveUserProfile(payload);
+
+      const isDev = user.id.startsWith('00000000');
+      if (!isDev) {
+        try {
+          const updated = await updateProfile(user.id, {
+            full_name: payload.fullName,
+            phone: payload.phone,
+          });
+          setProfile(updated);
+        } catch (e) {
+          console.warn('[useAuth] Remote profile sync failed:', e);
+          if (profile) {
+            setProfile({ ...profile, full_name: payload.fullName, phone: payload.phone });
+          }
+        }
+      } else if (profile) {
+        setProfile({ ...profile, full_name: payload.fullName, phone: payload.phone });
+      }
+
+      if (markComplete) {
+        await markProfileSetupComplete(user.id);
+        setHasCompletedProfileSetup(true);
+      }
+    },
+    [user, profile, setProfile],
+  );
+
+  const completeProfileSetup = useCallback(
+    async (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => {
+      if (!user?.id) throw new Error('Not signed in');
+      await persistUserProfile({ ...data, userId: user.id }, true);
+      router.replace('/(tabs)' as any);
+    },
+    [persistUserProfile, user, router],
+  );
+
+  const updateUserProfile = useCallback(
+    async (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => {
+      if (!user?.id) throw new Error('Not signed in');
+      const existing = await isProfileSetupComplete(user.id);
+      await persistUserProfile({ ...data, userId: user.id }, existing);
+    },
+    [persistUserProfile, user],
+  );
 
   const signInWithGoogle = React.useCallback(async () => {
     console.log('[useAuth] signInWithGoogle initiated');
@@ -322,7 +429,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const devBypassLogin = React.useCallback((email: string) => {
+  const devBypassLogin = React.useCallback(async (email: string) => {
     const devUserId = '00000000-0000-0000-0000-000000000001';
     const mockUser = {
       id: devUserId,
@@ -336,8 +443,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const mockSession = {
       access_token: 'dev-bypass',
       refresh_token: 'dev-bypass',
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      expires_in: 60 * 60 * 24 * 90,
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 90,
       token_type: 'bearer',
       user: mockUser,
     } as Session;
@@ -351,13 +458,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       created_at: new Date().toISOString(),
     };
 
+    await saveDevSession(mockSession, mockUser);
+
     lastSessionUserIdRef.current = devUserId;
     setSession(mockSession);
     setUser(mockUser);
     setProfile(mockProfile);
     setHasConfirmedRole(true);
+    const setupDone = await isProfileSetupComplete(devUserId);
+    setHasCompletedProfileSetup(setupDone);
     setLoading(false);
-    console.log('[useAuth] devBypassLogin: skipped OTP, entered dashboard as owner');
+    console.log('[useAuth] devBypassLogin: session persisted');
   }, [setProfile]);
 
   const sendEmailOTP = React.useCallback(async (email: string) => {
@@ -399,27 +510,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // 1. CLEAR EVERYTHING LOCALLY FIRST (INSTANT FEEDBACK)
     console.log('[useAuth] Clearing internal state and cache...');
+    if (currentUserId) void clearUserProfileStorage(currentUserId);
+    void clearDevSession();
     AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
     clearCache();
     setProfile(null);
     setUser(null);
     setSession(null);
     setHasConfirmedRole(false);
+    setHasCompletedProfileSetup(false);
     setLoading(false); // Clear loading to let AuthGuard work immediately
     
     // 2. REDIRECT IMMEDIATELY
     console.log('[useAuth] Sign out initiated. Forcing instant redirect.');
     router.replace('/login' as any);
 
-    // 3. DO NETWORK CLEANUP IN BACKGROUND
-    try {
-      console.log('[useAuth] Finalizing cloud sign out in background...');
-      // No await here means we don't block the UI
-      supabase.auth.signOut().then(() => {
-        console.log('[useAuth] Cloud sign out final.');
-      });
-    } catch (e) {
-      console.warn('[useAuth] Background sign out error:', e);
+    if (!isDevBypassSession(session)) {
+      try {
+        console.log('[useAuth] Finalizing cloud sign out in background...');
+        void supabase.auth.signOut().then(() => {
+          console.log('[useAuth] Cloud sign out final.');
+        });
+      } catch (e) {
+        console.warn('[useAuth] Background sign out error:', e);
+      }
     }
   }, [user, router]);
 
@@ -540,11 +654,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const contextValue = React.useMemo(() => ({
     session, user, profile, loading, isInitialized,
     signInWithGoogle, sendEmailOTP, verifyEmailOTP, signOut, updateRole, resetProfile, resolveSalesmanFirm, refreshProfile,
-    hasConfirmedRole, confirmRole, devBypassLogin
+    hasConfirmedRole, hasCompletedProfileSetup, confirmRole, completeProfileSetup, updateUserProfile,
+    refreshProfileSetupStatus, devBypassLogin,
   }), [
     session, user, profile, loading, isInitialized,
     signInWithGoogle, sendEmailOTP, verifyEmailOTP, signOut, updateRole, resetProfile, resolveSalesmanFirm, refreshProfile,
-    hasConfirmedRole, confirmRole, devBypassLogin
+    hasConfirmedRole, hasCompletedProfileSetup, confirmRole, completeProfileSetup, updateUserProfile,
+    refreshProfileSetupStatus, devBypassLogin,
   ]);
 
   return (

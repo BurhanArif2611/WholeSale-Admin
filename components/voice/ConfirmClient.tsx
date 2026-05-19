@@ -4,6 +4,8 @@ import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius, Gradients } from '@/constants/theme';
+import { useLanguage } from '@/hooks/useLanguage';
+import { MOBILE_DIGIT_LENGTH, sanitizeMobileInput } from '@/lib/common/utils/validation';
 
 interface ConfirmClientProps {
   transcript: string;
@@ -16,6 +18,7 @@ interface ConfirmClientProps {
  * Allows manual adjustment of matched data before creating a new store/client entry.
  */
 export const ConfirmClient = React.memo(({ transcript, clientData, onUpdate }: ConfirmClientProps) => {
+  const { t } = useLanguage();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Spacing.xl }}>
       <View style={styles.transcriptBox}>
@@ -34,7 +37,8 @@ export const ConfirmClient = React.memo(({ transcript, clientData, onUpdate }: C
             style={styles.dInput}
             value={clientData.name}
             onChangeText={(v) => onUpdate({ name: v })}
-            placeholder="Client Name"
+            placeholder={t('ph_client_name')}
+            accessibilityLabel={t('client_business_name')}
             placeholderTextColor={Colors.textMuted}
           />
         </View>
@@ -47,7 +51,8 @@ export const ConfirmClient = React.memo(({ transcript, clientData, onUpdate }: C
             style={styles.dInput}
             value={clientData.area}
             onChangeText={(v) => onUpdate({ area: v })}
-            placeholder="Area / Location"
+            placeholder={t('ph_address')}
+            accessibilityLabel={t('address')}
             placeholderTextColor={Colors.textMuted}
           />
         </View>
@@ -58,10 +63,12 @@ export const ConfirmClient = React.memo(({ transcript, clientData, onUpdate }: C
           <Text style={styles.dLabel}>Phone</Text>
           <TextInput
             style={styles.dInput}
-            value={clientData.phone}
-            onChangeText={(v) => onUpdate({ phone: v })}
-            placeholder="Phone Number"
-            keyboardType="phone-pad"
+            value={clientData.phone ?? ''}
+            onChangeText={(v) => onUpdate({ phone: sanitizeMobileInput(v) })}
+            placeholder={t('ph_mobile')}
+            accessibilityLabel={t('phone_no')}
+            keyboardType="numeric"
+            maxLength={MOBILE_DIGIT_LENGTH}
             placeholderTextColor={Colors.textMuted}
           />
         </View>
@@ -75,9 +82,10 @@ export const ConfirmClient = React.memo(({ transcript, clientData, onUpdate }: C
               style={[styles.dInput, { flex: 1, minWidth: 60 }]}
               value={clientData.margin?.toString()}
               onChangeText={(v) => onUpdate({ margin: parseFloat(v) || 0 })}
-              placeholder="0"
+              placeholder={t('ph_discount_percent')}
               keyboardType="decimal-pad"
               placeholderTextColor={Colors.textMuted}
+              accessibilityLabel={t('product_margin')}
             />
             <Text style={styles.unitText}>%</Text>
           </View>

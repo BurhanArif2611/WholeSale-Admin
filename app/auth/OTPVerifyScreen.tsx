@@ -8,9 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Shadow } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function OTPVerifyScreen() {
   const { verifyEmailOTP, sendEmailOTP } = useAuth();
+  const { t } = useLanguage();
   const { email } = useLocalSearchParams<{ email: string }>();
   const router = useRouter();
   
@@ -58,7 +60,7 @@ export default function OTPVerifyScreen() {
   const handleVerify = async (otpCode?: string) => {
     const code = otpCode || otp.join('');
     if (code.length < 6) {
-      Alert.alert('Invalid OTP', 'Please enter the 6-digit code.');
+      Alert.alert(t('invalid_otp_title'), t('invalid_otp_msg'));
       return;
     }
 
@@ -106,16 +108,14 @@ export default function OTPVerifyScreen() {
                 <Ionicons name="shield-checkmark" size={54} color={Colors.white} />
               </LinearGradient>
             </View>
-            <Text style={styles.brandTitle}>Verify Email</Text>
-            <Text style={styles.brandTagline}>Code sent to {email}</Text>
+            <Text style={styles.brandTitle}>{t('verify_email_title')}</Text>
+            <Text style={styles.brandTagline}>{t('code_sent_to')} {email}</Text>
           </View>
 
           {/* Action Section */}
           <View style={styles.actionSection}>
-            <Text style={styles.welcomeText}>Enter Code</Text>
-            <Text style={styles.subText}>
-              Check your inbox for the 6-digit verification code.
-            </Text>
+            <Text style={styles.welcomeText}>{t('enter_code')}</Text>
+            <Text style={styles.subText}>{t('otp_subtitle')}</Text>
 
             <View style={styles.otpContainer}>
               {otp.map((digit, index) => (
@@ -129,8 +129,9 @@ export default function OTPVerifyScreen() {
                   keyboardType="number-pad"
                   maxLength={1}
                   autoFocus={index === 0}
-                  placeholder="-"
+                  placeholder="·"
                   placeholderTextColor="#CFD8DC"
+                  accessibilityLabel={`${t('enter_code')} ${index + 1}`}
                 />
               ))}
             </View>

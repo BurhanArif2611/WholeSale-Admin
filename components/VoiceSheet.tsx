@@ -21,6 +21,7 @@ import { Waveform } from './voice/Waveform';
 import { ConfirmOrder } from './voice/ConfirmOrder';
 import { ConfirmClient } from './voice/ConfirmClient';
 import { ConfirmProduct } from './voice/ConfirmProduct';
+import { isValidMobile, normalizeMobile } from '@/lib/common/utils/validation';
 
 export type VoiceMode = 'order' | 'client' | 'product';
 
@@ -200,8 +201,14 @@ export default function VoiceSheet({ visible, mode, initialClient, onClose, onBa
         setScreen('success');
         setTimeout(() => { resetAll(); onClose(); }, 800);
       } else if (mode === 'client' && clientData && ownerId) {
+        if (clientData.phone && !isValidMobile(clientData.phone)) {
+          Alert.alert('Invalid mobile', 'Please enter a valid 10-digit mobile number.');
+          return;
+        }
         await createStore({
-          name: clientData.name, phone: clientData.phone, area: clientData.area,
+          name: clientData.name,
+          phone: clientData.phone ? normalizeMobile(clientData.phone) : clientData.phone,
+          area: clientData.area,
           margin_percentage: clientData.margin ?? 0, extra_charges: 0,
           owner_id: ownerId
         });

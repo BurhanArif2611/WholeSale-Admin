@@ -24,6 +24,24 @@ export async function fetchProfile(id: string): Promise<Profile | null> {
 /**
  * Create or update a user profile record.
  */
+export async function updateProfile(
+  id: string,
+  patch: Partial<CreateProfilePayload>,
+): Promise<Profile> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[api] updateProfile error:', error);
+    throw error;
+  }
+  return data as Profile;
+}
+
 export async function createProfile(payload: CreateProfilePayload): Promise<Profile> {
   const { data, error } = await supabase
     .from('profiles')

@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,40 +13,43 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { Colors, Shadow } from "@/constants/theme";
+import { Input } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function LoginScreen() {
   const { sendEmailOTP, signInWithGoogle, devBypassLogin } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [touched, setTouched] = useState(false);
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const validateEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const emailError =
+    touched && (!email.trim() || !validateEmail(email))
+      ? t("invalid_email_msg")
+      : null;
 
   const handleSendOtp = async () => {
+    setTouched(true);
     if (!email || !validateEmail(email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      Alert.alert(t("invalid_email_title"), t("invalid_email_msg"));
       return;
     }
 
     setLoading(true);
     try {
-      // await sendEmailOTP(email.trim().toLowerCase());
-      // // On success, navigate to OTPVerifyScreen passing email
-      // router.push({
-      //   pathname: "/auth/OTPVerifyScreen",
-      //   params: { email: email.trim().toLowerCase() },
-      // });
       const normalizedEmail = email.trim().toLowerCase();
-      devBypassLogin(normalizedEmail);
-      router.replace("/(tabs)");
+      await devBypassLogin(normalizedEmail);
     } catch (e) {
-      Alert.alert("Error", (e as Error).message);
+      Alert.alert(t("error"), (e as Error).message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export default function LoginScreen() {
     try {
       await signInWithGoogle();
     } catch (e) {
-      Alert.alert("Error", (e as Error).message);
+      Alert.alert(t("error"), (e as Error).message);
     } finally {
       setGoogleLoading(false);
     }
@@ -69,12 +71,12 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      <StatusBar style="dark" />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          {/* Logo Section */}
           <View style={styles.logoSection}>
             <View style={[styles.logoCircle, Shadow.md]}>
               <LinearGradient
@@ -92,31 +94,26 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* Action Section */}
           <View style={styles.actionSection}>
-            <Text style={styles.welcomeText}>Login or Register</Text>
-            <Text style={styles.subText}>
-              Enter your email to receive a 6-digit verification code.
-            </Text>
+            <Text style={styles.welcomeText}>{t("login_welcome")}</Text>
+            <Text style={styles.subText}>{t("login_subtitle")}</Text>
 
             <View style={styles.inputContainer}>
-              <View style={styles.inputWrapper}>
-                <Ionicons
-                  name="at"
-                  size={20}
-                  color="#90A4AE"
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="name@company.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholderTextColor="#90A4AE"
-                />
-              </View>
+              <Input
+                label={t("label_email")}
+                required
+                value={email}
+                onChangeText={setEmail}
+                onBlur={() => setTouched(true)}
+                placeholder={t("ph_email")}
+                hint={t("hint_login_email")}
+                error={emailError}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                icon="mail-outline"
+                returnKeyType="done"
+                onSubmitEditing={handleSendOtp}
+              />
 
               <Pressable
                 onPress={handleSendOtp}
@@ -132,7 +129,7 @@ export default function LoginScreen() {
                 {loading ? (
                   <ActivityIndicator color={Colors.white} />
                 ) : (
-                  <Text style={styles.primaryBtnText}>Send OTP</Text>
+                  <Text style={styles.primaryBtnText}>{t("send_otp")}</Text>
                 )}
               </Pressable>
 
@@ -186,7 +183,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
   },
-
   logoSection: { alignItems: "center", marginTop: 20 },
   logoCircle: {
     width: 120,
@@ -221,7 +217,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textTransform: "uppercase",
   },
-
   actionSection: { width: "100%", alignItems: "center" },
   welcomeText: {
     fontSize: 24,
@@ -237,28 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     lineHeight: 20,
   },
-
   inputContainer: { width: "100%", paddingHorizontal: 10 },
-
-  inputWrapper: {
-    flexDirection: "row",
-    height: 60,
-    backgroundColor: "#F8F9FA",
-    borderRadius: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#ECEFF1",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  inputIcon: { marginRight: 12 },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#263238",
-  },
-
   primaryBtn: {
     width: "100%",
     height: 60,
@@ -266,6 +240,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 8,
     elevation: 4,
     shadowColor: "#FFA000",
     shadowOffset: { width: 0, height: 4 },
@@ -273,7 +248,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   primaryBtnText: { fontSize: 18, fontWeight: "800", color: Colors.white },
-
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -287,7 +261,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 12,
   },
-
   googleBtn: {
     width: "100%",
     height: 56,
@@ -300,7 +273,6 @@ const styles = StyleSheet.create({
     borderColor: "#ECEFF1",
   },
   googleBtnText: { fontSize: 15, fontWeight: "700", color: "#455A64" },
-
   footer: { paddingBottom: 20, marginTop: 40 },
   footerText: { fontSize: 10, color: "#CFD8DC", textAlign: "center" },
 });

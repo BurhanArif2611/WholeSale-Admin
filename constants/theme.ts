@@ -97,6 +97,19 @@ export const Spacing = {
   xxxl: 40,
 };
 
+/** Shared layout tokens for consistent screen structure */
+export const Layout = {
+  screenPaddingH: Spacing.lg,
+  screenPaddingBottom: 100,
+  contentGap: Spacing.md,
+  headerHeight: 52,
+  iconSize: {
+    sm: 18,
+    md: 22,
+    lg: 28,
+  },
+};
+
 export const Radius = {
   sm: 8,
   md: 12,
