@@ -18,6 +18,7 @@ import { FormField } from '@/lib/common/components/FormField';
 import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useBusinessCategories } from '@/hooks/useBusinessCategories';
 import { reportRepository, type ReportFilters, type ReportSummary } from '@/lib/data/repositories/reportRepository';
 import { categoryRepository } from '@/lib/data/repositories/categoryRepository';
 import { productRepository } from '@/lib/data/repositories/productRepository';
@@ -44,6 +45,7 @@ const PAYMENT_OPTS: { label: string; value?: PaymentStatus }[] = [
 export default function ReportsScreen() {
   const { t } = useLanguage();
   const { isReady, refreshKey } = useDatabase();
+  const { filterCategoryList, productQueryOptions } = useBusinessCategories();
 
   const [datePreset, setDatePreset] = useState<DatePreset>('month');
   const [dateFrom, setDateFrom] = useState(startOfMonth());
@@ -88,14 +90,14 @@ export default function ReportsScreen() {
     void (async () => {
       const [cats, prods, cls] = await Promise.all([
         categoryRepository.findAll(),
-        productRepository.findAll(),
+        productRepository.findAll('', '', productQueryOptions(null, '')),
         clientRepository.findAll(),
       ]);
-      setCategories(cats);
+      setCategories(filterCategoryList(cats));
       setProducts(prods);
       setClients(cls);
     })();
-  }, [isReady, refreshKey]);
+  }, [isReady, refreshKey, filterCategoryList, productQueryOptions]);
 
   const buildFilters = useCallback((): ReportFilters => {
     const f: ReportFilters = {

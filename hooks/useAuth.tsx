@@ -16,6 +16,12 @@ import {
   markProfileSetupComplete,
   clearUserProfileStorage,
 } from '@/lib/auth/userProfile';
+import {
+  isCategorySetupComplete,
+  clearBusinessCategoryStorage,
+  saveBusinessCategories,
+  saveShowAllCategories,
+} from '@/lib/preferences/businessCategories';
 import { normalizeMobile } from '@/lib/common/utils/validation';
 import {
   saveDevSession,
@@ -64,8 +70,11 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
   hasConfirmedRole: boolean;
   hasCompletedProfileSetup: boolean;
+  hasCompletedCategorySetup: boolean;
   confirmRole: () => void;
   completeProfileSetup: (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => Promise<void>;
+  completeCategorySetup: (categoryIds: string[]) => Promise<void>;
+  skipCategorySetup: () => Promise<void>;
   updateUserProfile: (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => Promise<void>;
   refreshProfileSetupStatus: () => Promise<void>;
   devBypassLogin: (email: string) => Promise<void>;
@@ -82,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasConfirmedRole, setHasConfirmedRole] = useState(false);
   const [hasCompletedProfileSetup, setHasCompletedProfileSetup] = useState(false);
+  const [hasCompletedCategorySetup, setHasCompletedCategorySetup] = useState(false);
   const isUpdatingRef = React.useRef(false);
   const syncInProgressRef = React.useRef<string | null>(null);
   const lastSessionUserIdRef = React.useRef<string | null>(null);
@@ -128,8 +138,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfileState(localProfile);
           if (localProfile?.role) setHasConfirmedRole(true);
           if (localProfile?.id) {
-            const setupDone = await isProfileSetupComplete(localProfile.id);
-            if (isMounted) setHasCompletedProfileSetup(setupDone);
+            const [setupDone, catDone] = await Promise.all([
+              isProfileSetupComplete(localProfile.id),
+              isCategorySetupComplete(localProfile.id),
+            ]);
+            if (isMounted) {
+              setHasCompletedProfileSetup(setupDone);
+              setHasCompletedCategorySetup(catDone);
+            }
           }
         }
 
@@ -153,8 +169,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               });
               setHasConfirmedRole(true);
             }
-            const setupDone = await isProfileSetupComplete(restoredUser.id);
-            if (isMounted) setHasCompletedProfileSetup(setupDone);
+            const [setupDone, catDone] = await Promise.all([
+              isProfileSetupComplete(restoredUser.id),
+              isCategorySetupComplete(restoredUser.id),
+            ]);
+            if (isMounted) {
+              setHasCompletedProfileSetup(setupDone);
+              setHasCompletedCategorySetup(catDone);
+            }
           } else {
             void syncProfile(restoredUser.id, 3, 1000, cacheValid);
           }
@@ -162,6 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfileState(null);
           setHasConfirmedRole(false);
           setHasCompletedProfileSetup(false);
+          setHasCompletedCategorySetup(false);
           AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
         }
 
@@ -200,8 +223,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           lastSessionUserIdRef.current = null;
           setProfileState(null);
           setHasConfirmedRole(false);
-          setHasCompletedProfileSetup(false);
-          void clearDevSession();
+      setHasCompletedProfileSetup(false);
+      setHasCompletedCategorySetup(false);
+      void clearDevSession();
           AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
         } else if (event === 'USER_UPDATED' && newUser) {
           void syncProfile(newUser.id);
@@ -295,10 +319,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const id = userId ?? user?.id;
     if (!id) {
       setHasCompletedProfileSetup(false);
+      setHasCompletedCategorySetup(false);
       return;
     }
-    const done = await isProfileSetupComplete(id);
-    setHasCompletedProfileSetup(done);
+    const [profileDone, catDone] = await Promise.all([
+      isProfileSetupComplete(id),
+      isCategorySetupComplete(id),
+    ]);
+    setHasCompletedProfileSetup(profileDone);
+    setHasCompletedCategorySetup(catDone);
   }, [user?.id]);
 
   useEffect(() => {
@@ -346,10 +375,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => {
       if (!user?.id) throw new Error('Not signed in');
       await persistUserProfile({ ...data, userId: user.id }, true);
-      router.replace('/(tabs)' as any);
+      router.replace('/category-setup' as any);
     },
     [persistUserProfile, user, router],
   );
+
+  const completeCategorySetup = useCallback(
+    async (categoryIds: string[]) => {
+      if (!user?.id) throw new Error('Not signed in');
+      if (categoryIds.length < 1) {
+        throw new Error('Select at least one category');
+      }
+      await saveBusinessCategories(user.id, categoryIds, true);
+      setHasCompletedCategorySetup(true);
+      router.replace('/(tabs)' as any);
+    },
+    [user, router],
+  );
+
+  const skipCategorySetup = useCallback(async () => {
+    if (!user?.id) throw new Error('Not signed in');
+    await saveBusinessCategories(user.id, [], true);
+    await saveShowAllCategories(user.id, true);
+    setHasCompletedCategorySetup(true);
+    router.replace('/(tabs)' as any);
+  }, [user, router]);
 
   const updateUserProfile = useCallback(
     async (data: Omit<UserProfileData, 'completedAt' | 'userId'>) => {
@@ -465,8 +515,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(mockUser);
     setProfile(mockProfile);
     setHasConfirmedRole(true);
-    const setupDone = await isProfileSetupComplete(devUserId);
+    const [setupDone, catDone] = await Promise.all([
+      isProfileSetupComplete(devUserId),
+      isCategorySetupComplete(devUserId),
+    ]);
     setHasCompletedProfileSetup(setupDone);
+    setHasCompletedCategorySetup(catDone);
     setLoading(false);
     console.log('[useAuth] devBypassLogin: session persisted');
   }, [setProfile]);
@@ -510,7 +564,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // 1. CLEAR EVERYTHING LOCALLY FIRST (INSTANT FEEDBACK)
     console.log('[useAuth] Clearing internal state and cache...');
-    if (currentUserId) void clearUserProfileStorage(currentUserId);
+    if (currentUserId) {
+      void clearUserProfileStorage(currentUserId);
+      void clearBusinessCategoryStorage(currentUserId);
+    }
     void clearDevSession();
     AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
     clearCache();
@@ -519,6 +576,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setHasConfirmedRole(false);
     setHasCompletedProfileSetup(false);
+    setHasCompletedCategorySetup(false);
     setLoading(false); // Clear loading to let AuthGuard work immediately
     
     // 2. REDIRECT IMMEDIATELY
@@ -654,12 +712,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const contextValue = React.useMemo(() => ({
     session, user, profile, loading, isInitialized,
     signInWithGoogle, sendEmailOTP, verifyEmailOTP, signOut, updateRole, resetProfile, resolveSalesmanFirm, refreshProfile,
-    hasConfirmedRole, hasCompletedProfileSetup, confirmRole, completeProfileSetup, updateUserProfile,
+    hasConfirmedRole, hasCompletedProfileSetup, hasCompletedCategorySetup, confirmRole, completeProfileSetup,
+    completeCategorySetup, skipCategorySetup, updateUserProfile,
     refreshProfileSetupStatus, devBypassLogin,
   }), [
     session, user, profile, loading, isInitialized,
     signInWithGoogle, sendEmailOTP, verifyEmailOTP, signOut, updateRole, resetProfile, resolveSalesmanFirm, refreshProfile,
-    hasConfirmedRole, hasCompletedProfileSetup, confirmRole, completeProfileSetup, updateUserProfile,
+    hasConfirmedRole, hasCompletedProfileSetup, hasCompletedCategorySetup, confirmRole, completeProfileSetup,
+    completeCategorySetup, skipCategorySetup, updateUserProfile,
     refreshProfileSetupStatus, devBypassLogin,
   ]);
 

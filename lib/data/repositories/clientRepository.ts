@@ -23,7 +23,31 @@ function rowToClient(row: Record<string, unknown>): Client {
   };
 }
 
+const WALK_IN_CLIENT_NAME = 'Walk-in Customer';
+const WALK_IN_CLIENT_MOBILE = '9000000000';
+
 export const clientRepository = {
+  /** Default client for instant / cash sales without registering a customer. */
+  async getOrCreateWalkInClient(): Promise<Client> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<Record<string, unknown>>(
+      `SELECT * FROM clients WHERE name = ? LIMIT 1`,
+      [WALK_IN_CLIENT_NAME],
+    );
+    if (row) return rowToClient(row);
+
+    return this.create({
+      name: WALK_IN_CLIENT_NAME,
+      mobile: WALK_IN_CLIENT_MOBILE,
+      alternate_mobile: null,
+      address: null,
+      gst_number: null,
+      email: null,
+      notes: 'Auto-created for walk-in / instant purchases',
+      credit_limit: 0,
+      profile_photo_uri: null,
+    });
+  },
   async findAll(search = ''): Promise<Client[]> {
     const db = await getDatabase();
     const q = `%${search.trim()}%`;

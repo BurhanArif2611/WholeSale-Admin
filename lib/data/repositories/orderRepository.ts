@@ -1,6 +1,6 @@
 import { getDatabase, runInTransaction } from '@/lib/core/database';
 import { generateId } from '@/lib/core/id';
-import { calculateLineTotal } from '@/lib/common/utils/pricing';
+import { calculateLineTotal, toBaseQuantity } from '@/lib/common/utils/pricing';
 import type { Order, OrderItem, OrderDiscountType, OrderStatus, PaymentStatus, UnitType } from '@/lib/domain/models';
 import { round2 } from '@/lib/common/utils/pricing';
 import { clientRepository } from './clientRepository';
@@ -52,7 +52,10 @@ function rowToItem(row: Record<string, unknown>): OrderItem {
 export interface CreateOrderItemInput {
   product_id: string | null;
   product_name: string;
+  /** Product selling / price unit. */
   unit_type: UnitType;
+  /** Unit the customer ordered in (defaults to unit_type). */
+  order_unit?: UnitType;
   quantity: number;
   unit_price: number;
   discount_percent?: number;
@@ -169,11 +172,12 @@ export const orderRepository = {
     let taxTotal = 0;
 
     const lineItems = input.items.map((item) => {
+      const orderUnit = item.order_unit ?? item.unit_type;
       const calc = calculateLineTotal(
         item.unit_price,
         item.unit_type,
         item.quantity,
-        item.unit_type,
+        orderUnit,
         item.discount_percent ?? 0,
         item.tax_percent ?? 0,
       );
@@ -182,6 +186,7 @@ export const orderRepository = {
       taxTotal += calc.taxAmount;
       return {
         ...item,
+        order_unit: orderUnit,
         line_total: calc.total,
         id: generateId(),
       };
@@ -234,7 +239,7 @@ export const orderRepository = {
             orderId,
             item.product_id,
             item.product_name,
-            item.unit_type,
+            item.order_unit ?? item.unit_type,
             item.quantity,
             item.unit_price,
             item.discount_percent ?? 0,
@@ -245,12 +250,13 @@ export const orderRepository = {
         );
 
         if (item.product_id) {
-          await productRepository.adjustStock(item.product_id, -item.quantity);
+          const stockDelta = toBaseQuantity(item.quantity, item.order_unit ?? item.unit_type);
+          await productRepository.adjustStock(item.product_id, -stockDelta);
           await inventoryRepository.addTransaction({
             product_id: item.product_id,
             product_name: item.product_name,
             type: 'sale',
-            quantity: -item.quantity,
+            quantity: -stockDelta,
             reference_id: orderId,
             notes: 'Auto deduction on order',
           });
@@ -293,12 +299,13 @@ export const orderRepository = {
 
       for (const item of items) {
         if (item.product_id) {
-          await productRepository.adjustStock(item.product_id, item.quantity);
+          const restoreQty = toBaseQuantity(item.quantity, item.unit_type);
+          await productRepository.adjustStock(item.product_id, restoreQty);
           await inventoryRepository.addTransaction({
             product_id: item.product_id,
             product_name: item.product_name,
             type: 'return',
-            quantity: item.quantity,
+            quantity: restoreQty,
             reference_id: id,
             notes: 'Stock restored on cancellation',
           });

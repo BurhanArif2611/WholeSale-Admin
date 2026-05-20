@@ -5,6 +5,7 @@ import { LanguageProvider } from '@/hooks/useLanguage';
 import { AppDialogProvider } from '@/lib/common/components/AppDialog';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { DatabaseProvider } from '@/hooks/useDatabase';
+import { BusinessCategoriesProvider } from '@/hooks/useBusinessCategories';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,6 +13,7 @@ import { DashboardSkeleton } from '@/components/ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/theme';
 import { StatusBar } from 'expo-status-bar';
+import { isWalkthroughComplete } from '@/lib/onboarding/walkthroughStorage';
 
 // Prevent splash screen from hiding until fonts/auth are ready
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -43,7 +45,7 @@ export default function RootLayout() {
         <DatabaseProvider>
           <LanguageProvider>
             <AppDialogProvider>
-              <RootLayoutNav />
+              <BusinessCategoriesGate />
             </AppDialogProvider>
           </LanguageProvider>
         </DatabaseProvider>
@@ -52,15 +54,34 @@ export default function RootLayout() {
   );
 }
 
+function BusinessCategoriesGate() {
+  const { user } = useAuth();
+  return (
+    <BusinessCategoriesProvider userId={user?.id}>
+      <RootLayoutNav />
+    </BusinessCategoriesProvider>
+  );
+}
+
 /**
  * RootLayoutNav - Central Navigation Gate.
  * Enforces role-based access control and session management via router redirects.
  */
 function RootLayoutNav() {
-  const { session, profile, loading, hasConfirmedRole, hasCompletedProfileSetup, user, isInitialized } = useAuth();
+  const {
+    session,
+    profile,
+    loading,
+    hasConfirmedRole,
+    hasCompletedProfileSetup,
+    hasCompletedCategorySetup,
+    user,
+    isInitialized,
+  } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const [isReady, setIsReady] = React.useState(false);
+  const [walkthroughDone, setWalkthroughDone] = React.useState<boolean | null>(null);
 
   useEffect(() => {
      if (isInitialized && !isReady) {
@@ -70,14 +91,30 @@ function RootLayoutNav() {
   }, [isInitialized, isReady]);
 
   useEffect(() => {
-    if (!isInitialized) return;
+    void isWalkthroughComplete().then(setWalkthroughDone);
+  }, []);
+
+  useEffect(() => {
+    if (!isInitialized || walkthroughDone === null) return;
 
     const firstSegment = segments[0] as string;
-    const authScreens = new Set(['login', 'auth-callback', 'onboarding', 'auth', 'profile-setup']);
+    const authScreens = new Set([
+      'walkthrough',
+      'login',
+      'auth-callback',
+      'onboarding',
+      'auth',
+      'profile-setup',
+      'category-setup',
+    ]);
     const isAuthScreen = authScreens.has(firstSegment);
 
     if (!session) {
-      if (!isAuthScreen || firstSegment === 'profile-setup') {
+      if (!walkthroughDone && firstSegment !== 'walkthrough') {
+        router.replace('/walkthrough');
+        return;
+      }
+      if (walkthroughDone && (!isAuthScreen || firstSegment === 'profile-setup' || firstSegment === 'category-setup')) {
         router.replace('/login');
       }
       return;
@@ -99,10 +136,34 @@ function RootLayoutNav() {
       return;
     }
 
+    if (!hasCompletedCategorySetup) {
+      if (firstSegment !== 'category-setup') {
+        router.replace('/category-setup');
+      }
+      return;
+    }
+
     if (isAuthScreen && firstSegment !== 'auth-callback') {
       router.replace('/(tabs)');
     }
-  }, [isInitialized, session, profile, hasConfirmedRole, hasCompletedProfileSetup, segments, user, router]);
+  }, [
+    isInitialized,
+    walkthroughDone,
+    session,
+    profile,
+    hasConfirmedRole,
+    hasCompletedProfileSetup,
+    hasCompletedCategorySetup,
+    segments,
+    user,
+    router,
+  ]);
+
+  useEffect(() => {
+    if (segments[0] === 'login' || segments[0] === 'walkthrough') {
+      void isWalkthroughComplete().then(setWalkthroughDone);
+    }
+  }, [segments]);
 
   const showBootOverlay = !isInitialized;
     
@@ -115,9 +176,11 @@ function RootLayoutNav() {
             animation: 'slide_from_right' 
         }}
       >
+        <Stack.Screen name="walkthrough" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
         <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
         <Stack.Screen name="profile-setup" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="category-setup" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="auth-callback" options={{ presentation: 'transparentModal' }} />
         <Stack.Screen name="clients/new" />
@@ -125,6 +188,8 @@ function RootLayoutNav() {
         <Stack.Screen name="products/new" />
         <Stack.Screen name="products/[id]" />
         <Stack.Screen name="orders/new" />
+        <Stack.Screen name="orders/instant" />
+        <Stack.Screen name="orders/success" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="orders/[id]" />
         <Stack.Screen name="categories/index" />
         <Stack.Screen name="categories/new" />

@@ -69,6 +69,14 @@ export default function SettingsScreen() {
 
       <SettingsSection title={t('settings_section_business')}>
         <SettingsRow
+          icon="grid-outline"
+          iconColor={Colors.purple}
+          iconBg={Colors.purple + '18'}
+          label={t('settings_business_categories')}
+          subtitle={t('settings_business_categories_sub')}
+          onPress={() => router.push('/settings/categories')}
+        />
+        <SettingsRow
           icon="bar-chart"
           iconColor={Colors.info}
           iconBg={Colors.info + '18'}

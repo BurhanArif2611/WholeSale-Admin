@@ -7,6 +7,7 @@ import { Colors, Spacing, Radius, Shadow, Typography, Layout } from '@/constants
 import { EmptyState, SectionHeader } from '@/components/ui';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useBusinessCategories } from '@/hooks/useBusinessCategories';
 import { CategoryChips } from '@/lib/common/components/CategoryChips';
 import { productRepository } from '@/lib/data/repositories/productRepository';
 import { categoryRepository } from '@/lib/data/repositories/categoryRepository';
@@ -18,6 +19,7 @@ type InventoryTab = 'alerts' | 'history';
 export default function InventoryScreen() {
   const { t } = useLanguage();
   const { isReady, refreshKey } = useDatabase();
+  const { filterCategoryList, preferredIds, showAllCategories, hasPreferences } = useBusinessCategories();
   const [lowStock, setLowStock] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -34,11 +36,16 @@ export default function InventoryScreen() {
       inventoryRepository.getHistory(undefined, 50),
       categoryRepository.findAll(),
     ]);
-    setLowStock(low);
+    let filteredLow = low;
+    if (hasPreferences && !showAllCategories && !categoryId) {
+      const pref = new Set(preferredIds);
+      filteredLow = low.filter((p) => pref.has(p.category_id));
+    }
+    setLowStock(filteredLow);
     setHistory(hist);
-    setCategories(cats);
+    setCategories(filterCategoryList(cats));
     setLoading(false);
-  }, [isReady, refreshKey, categoryId]);
+  }, [isReady, refreshKey, categoryId, filterCategoryList, preferredIds, showAllCategories, hasPreferences]);
 
   useEffect(() => {
     void load();

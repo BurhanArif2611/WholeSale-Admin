@@ -49,8 +49,7 @@ export function ProductCard({
         </Text>
       </View>
       <View style={styles.actions}>
-        {rightElement}
-        {inCart && onQtyChange ? (
+        {rightElement ?? (inCart && onQtyChange ? (
           <QuantitySelector
             value={cartQty}
             onChange={onQtyChange}
@@ -61,7 +60,7 @@ export function ProductCard({
           <TouchableOpacity style={styles.addBtn} onPress={onAdd}>
             <Text style={styles.addText}>Add</Text>
           </TouchableOpacity>
-        ) : null}
+        ) : null)}
       </View>
     </TouchableOpacity>
   );
