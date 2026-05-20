@@ -9,6 +9,7 @@ import { ProductFilterBar } from '@/lib/common/components/ProductFilterBar';
 import { ProductCard } from '@/lib/common/components/ProductCard';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useBusinessCategories } from '@/hooks/useBusinessCategories';
 import { productRepository } from '@/lib/data/repositories/productRepository';
 import { categoryRepository } from '@/lib/data/repositories/categoryRepository';
 import type { Category, Product, ProductSortField, SortDirection } from '@/lib/domain/models';
@@ -17,6 +18,7 @@ export default function ProductsScreen() {
   const router = useRouter();
   const { t } = useLanguage();
   const { isReady, refreshKey } = useDatabase();
+  const { filterCategoryList, productQueryOptions } = useBusinessCategories();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
@@ -29,13 +31,17 @@ export default function ProductsScreen() {
     if (!isReady) return;
     setLoading(true);
     const [data, cats] = await Promise.all([
-      productRepository.findAll(search, categoryId || '', { sortBy, sortDir }),
+      productRepository.findAll(search, categoryId || '', {
+        sortBy,
+        sortDir,
+        ...productQueryOptions(categoryId, search),
+      }),
       categoryRepository.findAll(),
     ]);
     setProducts(data);
-    setCategories(cats);
+    setCategories(filterCategoryList(cats));
     setLoading(false);
-  }, [isReady, search, categoryId, sortBy, sortDir, refreshKey]);
+  }, [isReady, search, categoryId, sortBy, sortDir, refreshKey, productQueryOptions, filterCategoryList]);
 
   useEffect(() => {
     void load();

@@ -1,13 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, formatCurrency, Layout } from '@/constants/theme';
 import { SearchBar, EmptyState } from '@/components/ui';
 import { FAB } from '@/lib/common/components/FAB';
 import { ListCard } from '@/lib/common/components/ListCard';
+import { ShareReceiptSheet } from '@/components/receipt/ShareReceiptSheet';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useShopProfile } from '@/hooks/useShopProfile';
 import { orderRepository } from '@/lib/data/repositories/orderRepository';
+import { clientRepository } from '@/lib/data/repositories/clientRepository';
+import { buildReceiptData, type ReceiptData } from '@/lib/receipt/receiptTypes';
 import { appConfirm } from '@/lib/common/utils/appAlert';
 import type { Order, PaymentStatus } from '@/lib/domain/models';
 
@@ -15,10 +20,14 @@ export default function OrdersScreen() {
   const router = useRouter();
   const { t } = useLanguage();
   const { isReady, refreshKey } = useDatabase();
+  const { shop } = useShopProfile();
   const [orders, setOrders] = useState<Order[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<PaymentStatus | undefined>();
   const [loading, setLoading] = useState(true);
+  const [shareReceipt, setShareReceipt] = useState<ReceiptData | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareBusy, setShareBusy] = useState(false);
 
   const filters: { label: string; value?: PaymentStatus }[] = [
     { label: t('all') },
@@ -38,6 +47,20 @@ export default function OrdersScreen() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const handleQuickShare = async (item: Order) => {
+    setShareBusy(true);
+    try {
+      const orderItems = await orderRepository.getItems(item.id);
+      const client = await clientRepository.findById(item.client_id);
+      setShareReceipt(buildReceiptData(item, orderItems, client, shop));
+      setShareOpen(true);
+    } catch (e) {
+      Alert.alert(t('error'), (e as Error).message);
+    } finally {
+      setShareBusy(false);
+    }
+  };
 
   const handleCancel = async (item: Order) => {
     const yes = await appConfirm(t('settings_cancel_order'), t('settings_cancel_order_msg'));
@@ -86,6 +109,25 @@ export default function OrdersScreen() {
               iconBg={item.payment_status === 'paid' ? Colors.successBg : Colors.amberBg}
               accentColor={item.payment_status === 'paid' ? Colors.success : Colors.amber}
               onPress={() => router.push(`/orders/${item.id}`)}
+              trailing={
+                <View style={styles.quickActions}>
+                  <Pressable
+                    style={styles.quickBtn}
+                    onPress={() => void handleQuickShare(item)}
+                    disabled={shareBusy}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="share-social-outline" size={18} color={Colors.amber} />
+                  </Pressable>
+                  <Pressable
+                    style={styles.quickBtn}
+                    onPress={() => router.push(`/orders/${item.id}`)}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="document-text-outline" size={18} color={Colors.info} />
+                  </Pressable>
+                </View>
+              }
             />
             {item.status !== 'cancelled' && (
               <Pressable style={styles.cancelLink} onPress={() => void handleCancel(item)}>
@@ -94,6 +136,15 @@ export default function OrdersScreen() {
             )}
           </View>
         )}
+      />
+      <ShareReceiptSheet
+        visible={shareOpen}
+        data={shareReceipt}
+        onClose={() => {
+          setShareOpen(false);
+          setShareReceipt(null);
+        }}
+        t={t}
       />
       <FAB onPress={() => router.push('/orders/new')} icon="cart" />
     </View>
@@ -111,4 +162,15 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: Layout.screenPaddingBottom },
   cancelLink: { marginTop: -6, marginBottom: Spacing.sm, alignSelf: 'flex-end', paddingRight: Spacing.sm },
   cancel: { fontSize: 11, color: Colors.danger, fontWeight: '700' },
+  quickActions: { flexDirection: 'row', gap: 4, marginLeft: Spacing.xs },
+  quickBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
 });

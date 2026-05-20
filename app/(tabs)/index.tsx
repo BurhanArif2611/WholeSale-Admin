@@ -13,6 +13,7 @@ const { width } = Dimensions.get('window');
 const CARD_W = (width - Spacing.lg * 2 - Spacing.md) / 2;
 
 const MODULES = [
+  { title: 'Instant Purchase', subtitle: 'Walk-in & quick billing', icon: 'flash' as const, route: '/orders/instant', color: '#FFF8E7', iconColor: Colors.amber },
   { title: 'Add Client', subtitle: 'Customers & ledger', icon: 'people' as const, route: '/clients/new', color: Colors.soft.info, iconColor: Colors.info },
   { title: 'Categories', subtitle: 'Organize products', icon: 'pricetags' as const, route: '/categories', color: Colors.soft.purple, iconColor: Colors.purple },
   { title: 'Products', subtitle: 'Catalog & pricing', icon: 'cube' as const, route: '/(tabs)/products', color: Colors.soft.indigo, iconColor: Colors.info },

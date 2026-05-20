@@ -14,6 +14,7 @@ export function toBaseQuantity(quantity: number, unit: UnitType): number {
     case 'piece':
     case 'box':
     case 'packet':
+    case 'meter':
       return quantity;
     default:
       return quantity;
@@ -102,4 +103,12 @@ export const UNIT_OPTIONS: { label: string; value: UnitType }[] = [
   { label: 'Piece', value: 'piece' },
   { label: 'Box', value: 'box' },
   { label: 'Packet', value: 'packet' },
+  { label: 'Meter', value: 'meter' },
 ];
+
+/** Units the user may enter quantity in for a product priced in `priceUnit`. */
+export function getCompatibleOrderUnits(priceUnit: UnitType): UnitType[] {
+  if (priceUnit === 'kg' || priceUnit === 'gram') return ['kg', 'gram'];
+  if (priceUnit === 'liter' || priceUnit === 'ml') return ['liter', 'ml'];
+  return [priceUnit];
+}

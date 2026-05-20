@@ -30,6 +30,9 @@ interface ScreenLayoutProps {
   keyboardAvoiding?: boolean;
   footer?: ReactNode;
   contentStyle?: ViewStyle;
+  /** Renders below header, stays fixed (not scrolled with body). */
+  subHeader?: ReactNode;
+  compactHeader?: boolean;
 }
 
 export function ScreenLayout({
@@ -48,6 +51,8 @@ export function ScreenLayout({
   keyboardAvoiding = false,
   footer,
   contentStyle,
+  subHeader,
+  compactHeader = false,
 }: ScreenLayoutProps) {
   const body = loading ? (
     <View style={styles.center}>
@@ -89,7 +94,14 @@ export function ScreenLayout({
 
   const main = (
     <>
-      <ScreenHeader title={title} showBack={showBack} onBack={onBack} rightElement={rightElement} />
+      <ScreenHeader
+        title={title}
+        showBack={showBack}
+        onBack={onBack}
+        rightElement={rightElement}
+        compact={compactHeader}
+      />
+      {subHeader}
       {scrollable}
       {footer}
     </>

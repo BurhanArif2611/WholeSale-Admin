@@ -22,7 +22,7 @@ export function computeCartBreakdown(cart: CartLineInput[]): CartBreakdown {
       item.unit_price,
       item.unit_type,
       item.quantity,
-      item.unit_type,
+      item.order_unit ?? item.unit_type,
       item.discount_percent,
       item.tax_percent,
     );

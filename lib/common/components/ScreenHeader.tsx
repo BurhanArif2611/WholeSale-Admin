@@ -11,6 +11,7 @@ interface ScreenHeaderProps {
   onBack?: () => void;
   rightElement?: ReactNode;
   style?: ViewStyle;
+  compact?: boolean;
 }
 
 export function ScreenHeader({
@@ -19,6 +20,7 @@ export function ScreenHeader({
   onBack,
   rightElement,
   style,
+  compact = false,
 }: ScreenHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -36,8 +38,8 @@ export function ScreenHeader({
   };
 
   return (
-    <View style={[styles.wrapper, { paddingTop: insets.top + Spacing.xs }, style]}>
-      <View style={styles.row}>
+    <View style={[styles.wrapper, { paddingTop: insets.top + (compact ? 4 : Spacing.xs) }, compact && styles.wrapperCompact, style]}>
+      <View style={[styles.row, compact && styles.rowCompact]}>
         {showBack ? (
           <TouchableOpacity
             onPress={handleBack}
@@ -52,7 +54,7 @@ export function ScreenHeader({
           <View style={styles.sideBtn} />
         )}
 
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, compact && styles.titleCompact]} numberOfLines={1}>
           {title}
         </Text>
 
@@ -70,11 +72,16 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingHorizontal: Layout.screenPaddingH,
   },
+  wrapperCompact: {
+    paddingBottom: Spacing.xs,
+    borderBottomColor: Colors.borderLight,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: Layout.headerHeight,
   },
+  rowCompact: { minHeight: 40 },
   sideBtn: {
     width: 40,
     height: 40,
@@ -89,5 +96,8 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     letterSpacing: Typography.tight,
     paddingHorizontal: Spacing.xs,
+  },
+  titleCompact: {
+    fontSize: Typography.sm,
   },
 });

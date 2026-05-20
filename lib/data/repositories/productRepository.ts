@@ -8,6 +8,12 @@ export interface ProductQueryOptions {
   categoryId?: string;
   sortBy?: ProductSortField;
   sortDir?: SortDirection;
+  /** Prioritize / filter by user's preferred business categories */
+  preferredCategoryIds?: string[];
+  /** Sort preferred category products first (when no explicit category filter) */
+  preferPreferredCategories?: boolean;
+  /** Hide products outside preferred categories (when no search & no category filter) */
+  onlyPreferredCategories?: boolean;
 }
 
 function rowToProduct(row: Record<string, unknown>): Product {
@@ -64,9 +70,34 @@ export const productRepository = {
       params.push(cat);
     }
 
+    const preferred = options?.preferredCategoryIds?.filter(Boolean) ?? [];
+    const hasSearch = !!q;
+    const onlyPreferred =
+      !cat &&
+      !hasSearch &&
+      preferred.length > 0 &&
+      options?.onlyPreferredCategories;
+
+    if (onlyPreferred) {
+      const placeholders = preferred.map(() => '?').join(',');
+      sql += ` AND category_id IN (${placeholders})`;
+      params.push(...preferred);
+    }
+
     const sortBy = options?.sortBy ?? 'name';
     const sortDir = options?.sortDir ?? 'asc';
-    sql += ` ORDER BY ${sortClause(sortBy, sortDir)}`;
+    const preferSort =
+      !cat &&
+      preferred.length > 0 &&
+      options?.preferPreferredCategories;
+
+    if (preferSort) {
+      const cases = preferred.map((_, i) => `WHEN category_id = ? THEN ${i}`).join(' ');
+      sql += ` ORDER BY CASE ${cases} ELSE ${preferred.length} END, ${sortClause(sortBy, sortDir)}`;
+      params.push(...preferred);
+    } else {
+      sql += ` ORDER BY ${sortClause(sortBy, sortDir)}`;
+    }
 
     const rows = await db.getAllAsync<Record<string, unknown>>(sql, params);
     return rows.map(rowToProduct);
@@ -89,6 +120,25 @@ export const productRepository = {
     const db = await getDatabase();
     const row = await db.getFirstAsync<Record<string, unknown>>(`SELECT * FROM products WHERE id = ?`, [id]);
     return row ? rowToProduct(row) : null;
+  },
+
+  /** Products from recent order lines (for quick re-order). */
+  async findRecent(limit = 8): Promise<Product[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<Record<string, unknown>>(
+      `SELECT p.* FROM products p
+       INNER JOIN (
+         SELECT product_id, MAX(oi.id) as last_line
+         FROM order_items oi
+         WHERE product_id IS NOT NULL
+         GROUP BY product_id
+         ORDER BY last_line DESC
+         LIMIT ?
+       ) recent ON p.id = recent.product_id
+       ORDER BY recent.last_line DESC`,
+      [limit],
+    );
+    return rows.map(rowToProduct);
   },
 
   async findByBarcode(barcode: string): Promise<Product | null> {

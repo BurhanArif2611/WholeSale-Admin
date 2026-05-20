@@ -1,4 +1,4 @@
-export type UnitType = 'kg' | 'gram' | 'liter' | 'ml' | 'piece' | 'box' | 'packet';
+export type UnitType = 'kg' | 'gram' | 'liter' | 'ml' | 'piece' | 'box' | 'packet' | 'meter';
 export type OrderDiscountType = 'percent' | 'fixed';
 export type PaymentStatus = 'pending' | 'partial' | 'paid';
 export type OrderStatus = 'new' | 'confirmed' | 'delivered' | 'cancelled' | 'returned';
