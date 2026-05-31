@@ -14,7 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { FormField } from '@/lib/common/components/FormField';
 import { Button } from '@/components/ui';
-import { Colors, Spacing, Radius, Shadow, Gradients, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, Typography, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LANGUAGES, Locale } from '@/constants/translations';
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   progressDotActive: { backgroundColor: Colors.amber, width: 24, borderRadius: 5 },
   progressBar: { flex: 1, height: 4, backgroundColor: Colors.border, borderRadius: 2 },
-  progressLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '700' },
+  progressLabel: { fontSize: 11, color: Colors.textMuted, fontFamily: Fonts.bold },
   avatarWrap: { alignSelf: 'center', marginBottom: Spacing.sm, ...Shadow.md },
   avatar: {
     width: 96,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.white,
   },
-  avatarInitials: { fontSize: 32, fontWeight: '900', color: Colors.white },
+  avatarInitials: { fontSize: 32, fontFamily: Fonts.bold, color: Colors.white },
   avatarBadge: {
     position: 'absolute',
     bottom: 0,
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -271,6 +271,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   langChipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  langChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
+  langChipText: { fontSize: 13, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   langChipTextActive: { color: Colors.white },
 });

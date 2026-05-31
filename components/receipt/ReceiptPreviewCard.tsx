@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import type { ReceiptData } from '@/lib/receipt/receiptTypes';
 import { formatQuantityDisplay } from '@/lib/common/utils/quantity';
 
@@ -149,18 +149,18 @@ const styles = StyleSheet.create({
   badgeRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 6, padding: Spacing.sm, paddingBottom: 0 },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 8, paddingVertical: 4, borderRadius: Radius.full },
   badgePdf: { backgroundColor: Colors.successBg },
-  badgePdfText: { fontSize: 10, fontWeight: Typography.bold, color: Colors.success },
+  badgePdfText: { fontSize: 10, fontFamily: Fonts.bold, color: Colors.success },
   badgePrint: { backgroundColor: Colors.purpleBg },
-  badgePrintText: { fontSize: 10, fontWeight: Typography.bold, color: Colors.purple },
+  badgePrintText: { fontSize: 10, fontFamily: Fonts.bold, color: Colors.purple },
   shopBlock: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, alignItems: 'center' },
-  shopName: { fontSize: Typography.md, fontWeight: Typography.black, color: Colors.textPrimary, textAlign: 'center' },
+  shopName: { fontSize: Typography.md, fontFamily: Fonts.bold, color: Colors.textPrimary, textAlign: 'center' },
   shopMeta: { fontSize: Typography.xs, color: Colors.textMuted, textAlign: 'center', marginTop: 2 },
   divider: { height: 1, backgroundColor: Colors.border, marginHorizontal: Spacing.md },
   dividerBold: { height: 2, backgroundColor: Colors.textPrimary, marginHorizontal: Spacing.md, marginTop: Spacing.sm },
   metaBlock: { padding: Spacing.md, gap: 6 },
   metaLine: { flexDirection: 'row', gap: Spacing.sm },
-  metaLabel: { width: 100, fontSize: Typography.xs, color: Colors.textMuted, fontWeight: Typography.semibold },
-  metaValue: { flex: 1, fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textPrimary },
+  metaLabel: { width: 100, fontSize: Typography.xs, color: Colors.textMuted, fontFamily: Fonts.semibold },
+  metaValue: { flex: 1, fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textPrimary },
   metaMultiline: { lineHeight: 18 },
   tableHeader: {
     flexDirection: 'row',
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: Colors.borderLight,
   },
-  th: { flex: 1, fontSize: 10, fontWeight: Typography.bold, color: Colors.textMuted, textTransform: 'uppercase' },
+  th: { flex: 1, fontSize: 10, fontFamily: Fonts.bold, color: Colors.textMuted, textTransform: 'uppercase' },
   thItem: { flex: 2 },
   thRight: { textAlign: 'right' },
   itemsScroll: { maxHeight: 160 },
@@ -180,13 +180,13 @@ const styles = StyleSheet.create({
   td: { flex: 1, fontSize: 11, color: Colors.textPrimary },
   tdItem: { flex: 2 },
   tdRight: { textAlign: 'right' },
-  tdBold: { fontWeight: Typography.bold },
+  tdBold: { fontFamily: Fonts.bold },
   tempTag: { color: Colors.info, fontSize: 10 },
   moreItems: { textAlign: 'center', fontSize: Typography.xs, color: Colors.amber, padding: Spacing.sm },
   summary: { padding: Spacing.md },
   summaryLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
   summaryLabel: { fontSize: Typography.xs, color: Colors.textSecondary },
-  summaryValue: { fontSize: Typography.xs, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  summaryValue: { fontSize: Typography.xs, fontFamily: Fonts.semibold, color: Colors.textPrimary },
   grandRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -197,18 +197,18 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.borderLight,
     borderStyle: 'dashed',
   },
-  grandLabel: { fontSize: Typography.md, fontWeight: Typography.black, color: Colors.textPrimary },
-  grandValue: { fontSize: Typography.lg, fontWeight: Typography.black, color: Colors.textPrimary },
+  grandLabel: { fontSize: Typography.md, fontFamily: Fonts.bold, color: Colors.textPrimary },
+  grandValue: { fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.textPrimary },
   payRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
   payMeta: { fontSize: 10, color: Colors.textMuted, flex: 1 },
   statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
-  statusText: { fontSize: 10, fontWeight: Typography.bold, textTransform: 'capitalize' },
+  statusText: { fontSize: 10, fontFamily: Fonts.bold, textTransform: 'capitalize' },
   thanks: {
     textAlign: 'center',
     fontSize: Typography.xs,
     color: Colors.textMuted,
     padding: Spacing.md,
     backgroundColor: Colors.surface2,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
 });

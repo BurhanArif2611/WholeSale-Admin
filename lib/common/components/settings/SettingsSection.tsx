@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Spacing, Typography, Radius } from '@/constants/theme';
+import { Colors, Spacing, Typography, Radius, Fonts } from '@/constants/theme';
 
 interface SettingsSectionProps {
   title: string;
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
   wrap: { marginBottom: Spacing.lg },
   title: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     letterSpacing: 1,
     textTransform: 'uppercase',

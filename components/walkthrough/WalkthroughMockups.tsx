@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { WalkthroughColors, WalkthroughGradients } from '@/constants/walkthroughTheme';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography, Fonts } from '@/constants/theme';
 
 function useFloatAnim(delay = 0) {
   const y = useRef(new Animated.Value(0)).current;
@@ -214,9 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { color: WalkthroughColors.textPrimary, fontWeight: Typography.bold, fontSize: 14 },
+  avatarText: { color: WalkthroughColors.textPrimary, fontFamily: Fonts.bold, fontSize: 14 },
   clientInfo: { flex: 1 },
-  mockTitle: { color: WalkthroughColors.textPrimary, fontSize: 14, fontWeight: Typography.bold },
+  mockTitle: { color: WalkthroughColors.textPrimary, fontSize: 14, fontFamily: Fonts.bold },
   mockSub: { color: WalkthroughColors.textMuted, fontSize: 11, marginTop: 2 },
   debtBadge: {
     backgroundColor: WalkthroughColors.danger + '22',
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radius.sm,
   },
-  debtText: { color: WalkthroughColors.danger, fontSize: 11, fontWeight: Typography.bold },
+  debtText: { color: WalkthroughColors.danger, fontSize: 11, fontFamily: Fonts.bold },
   fab: {
     position: 'absolute',
     right: Spacing.lg,
@@ -256,10 +256,10 @@ const styles = StyleSheet.create({
   qtyHighlight: {
     color: WalkthroughColors.amberLight,
     fontSize: 12,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     marginTop: 4,
   },
-  priceText: { color: WalkthroughColors.textPrimary, fontSize: 13, fontWeight: Typography.bold, marginTop: 4 },
+  priceText: { color: WalkthroughColors.textPrimary, fontSize: 13, fontFamily: Fonts.bold, marginTop: 4 },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   orderCard: { marginBottom: Spacing.md },
   orderLine: { marginBottom: Spacing.sm },
   discountRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  discountText: { color: WalkthroughColors.amberLight, fontSize: 11, fontWeight: Typography.semibold },
+  discountText: { color: WalkthroughColors.amberLight, fontSize: 11, fontFamily: Fonts.semibold },
   checkoutBar: { borderRadius: Radius.lg, overflow: 'hidden' },
   checkoutGradient: {
     flexDirection: 'row',
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   checkoutLabel: { color: WalkthroughColors.bg, fontSize: 11, opacity: 0.85 },
-  checkoutTotal: { color: WalkthroughColors.bg, fontSize: 18, fontWeight: Typography.extrabold },
+  checkoutTotal: { color: WalkthroughColors.bg, fontSize: 18, fontFamily: Fonts.bold },
   checkoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: Radius.full,
   },
-  checkoutBtnText: { color: WalkthroughColors.bg, fontWeight: Typography.bold, fontSize: 13 },
+  checkoutBtnText: { color: WalkthroughColors.bg, fontFamily: Fonts.bold, fontSize: 13 },
   receiptChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -306,11 +306,11 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     backgroundColor: WalkthroughColors.info + '22',
   },
-  receiptText: { color: WalkthroughColors.info, fontSize: 11, fontWeight: Typography.semibold },
+  receiptText: { color: WalkthroughColors.info, fontSize: 11, fontFamily: Fonts.semibold },
   ledgerSummary: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   summaryCard: { flex: 1, alignItems: 'center' },
-  summaryLabel: { color: WalkthroughColors.textMuted, fontSize: 10, fontWeight: Typography.semibold },
-  summaryValue: { fontSize: 16, fontWeight: Typography.extrabold, marginTop: 4 },
+  summaryLabel: { color: WalkthroughColors.textMuted, fontSize: 10, fontFamily: Fonts.semibold },
+  summaryValue: { fontSize: 16, fontFamily: Fonts.bold, marginTop: 4 },
   ledgerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
   paidPill: { backgroundColor: WalkthroughColors.success + '28' },
   pendingPill: { backgroundColor: WalkthroughColors.amber + '28' },
-  paidText: { color: WalkthroughColors.success, fontSize: 10, fontWeight: Typography.bold },
-  pendingText: { color: WalkthroughColors.amberLight, fontSize: 10, fontWeight: Typography.bold },
-  ledgerAmount: { color: WalkthroughColors.success, fontSize: 13, fontWeight: Typography.bold },
+  paidText: { color: WalkthroughColors.success, fontSize: 10, fontFamily: Fonts.bold },
+  pendingText: { color: WalkthroughColors.amberLight, fontSize: 10, fontFamily: Fonts.bold },
+  ledgerAmount: { color: WalkthroughColors.success, fontSize: 13, fontFamily: Fonts.bold },
 });

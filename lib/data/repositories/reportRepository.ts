@@ -84,6 +84,7 @@ function rowToOrder(row: Record<string, unknown>): Order {
     delivery_date: (row.delivery_date as string) ?? null,
     delivery_address: (row.delivery_address as string) ?? null,
     notes: (row.notes as string) ?? null,
+    discount_approval_status: (row.discount_approval_status as Order['discount_approval_status']) ?? 'none',
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   };

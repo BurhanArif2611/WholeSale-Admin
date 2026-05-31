@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Gradients, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ModernToast } from '@/components/ui';
@@ -205,30 +205,30 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   content: { flex: 1, padding: Spacing.xl, justifyContent: 'center' },
   header: { marginBottom: 40, alignItems: 'center' },
-  welcome: { fontSize: 16, color: Colors.textSecondary, fontWeight: '500' },
-  title: { fontSize: 32, fontWeight: Typography.black, color: Colors.textPrimary, marginTop: 4 },
+  welcome: { fontSize: 16, color: Colors.textSecondary, fontFamily: Fonts.medium },
+  title: { fontSize: 32, fontFamily: Fonts.bold, color: Colors.textPrimary, marginTop: 4 },
   subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 8 },
   roleContainer: { gap: Spacing.lg, marginBottom: 40 },
   roleCard: { borderRadius: Radius.xxl, overflow: 'hidden', backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.borderLight },
   roleCardActive: { borderColor: Colors.info, borderWidth: 2 },
   cardGradient: { flexDirection: 'row', alignItems: 'center', padding: Spacing.xl, gap: Spacing.lg },
   iconBox: { width: 60, height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  roleName: { fontSize: 22, fontWeight: '900', color: Colors.textPrimary },
+  roleName: { fontSize: 22, fontFamily: Fonts.bold, color: Colors.textPrimary },
   roleInfo: { fontSize: 16, color: Colors.textSecondary, marginTop: 4, lineHeight: 24 },
   pinContainer: { padding: Spacing.xl, paddingTop: 0, alignItems: 'center' },
-  pinLabel: { fontSize: 14, fontWeight: '900', color: Colors.info, letterSpacing: 1.5, marginBottom: 8 },
+  pinLabel: { fontSize: 14, fontFamily: Fonts.bold, color: Colors.info, letterSpacing: 1.5, marginBottom: 8 },
   pinHint: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, lineHeight: 18 },
   pinRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
   pinBox: { width: 40, height: 50, borderRadius: Radius.md, backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
   pinBoxFilled: { borderColor: Colors.info, backgroundColor: Colors.info + '05' },
   pinBoxFocused: { borderColor: Colors.info, borderWidth: 2, backgroundColor: '#FFF', ...Shadow.sm },
-  pinText: { fontSize: 20, fontWeight: Typography.bold, color: Colors.textPrimary },
+  pinText: { fontSize: 20, fontFamily: Fonts.bold, color: Colors.textPrimary },
   cursor: { position: 'absolute', width: 2, height: 20, backgroundColor: Colors.info },
   hiddenInput: { position: 'absolute', opacity: 0, width: 1, height: 1 },
   submitCodeBtn: { width: '100%', borderRadius: Radius.lg, overflow: 'hidden', marginTop: 10 },
   submitGradient: { paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
-  submitText: { color: Colors.white, fontWeight: Typography.bold, fontSize: 15 },
-  cancelText: { color: Colors.textMuted, fontSize: 13, fontWeight: '600' },
+  submitText: { color: Colors.white, fontFamily: Fonts.bold, fontSize: 15 },
+  cancelText: { color: Colors.textMuted, fontSize: 13, fontFamily: Fonts.semibold },
   signOutBtn: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', padding: 10, gap: 6 },
-  signOutText: { fontSize: Typography.sm, color: Colors.danger, fontWeight: Typography.bold, textDecorationLine: 'underline' },
+  signOutText: { fontSize: Typography.sm, color: Colors.danger, fontFamily: Fonts.bold, textDecorationLine: 'underline' },
 });

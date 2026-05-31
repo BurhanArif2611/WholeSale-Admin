@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Gradients, formatCurrency } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Gradients, formatCurrency, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { resolvePrice } from '@/lib/api';
 import type { Store, Material } from '@/types';
@@ -161,28 +161,28 @@ const styles = StyleSheet.create({
   transcriptText: { flex: 1, fontSize: Typography.xs, color: Colors.textSecondary, fontStyle: 'italic', lineHeight: 18 },
   section:  { borderRadius: Radius.lg, padding: Spacing.lg, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
   sectionError: { borderColor: Colors.danger + '44', backgroundColor: Colors.dangerBg },
-  sLabel:   { fontSize: 10, fontWeight: Typography.black, color: Colors.textMuted, letterSpacing: 1.5, marginBottom: Spacing.md },
+  sLabel:   { fontSize: 10, fontFamily: Fonts.bold, color: Colors.textMuted, letterSpacing: 1.5, marginBottom: Spacing.md },
   row:      { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   avatar:   { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: Typography.base, fontWeight: Typography.black, color: Colors.black },
-  sValue:   { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary },
+  avatarText: { fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.black },
+  sValue:   { fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.textPrimary },
   sMeta:    { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
   itemRow:  { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.sm, borderBottomWidth: 1, borderColor: Colors.border + '55' },
-  itemNameInput: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary, padding: 0 },
+  itemNameInput: { fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary, padding: 0 },
   itemMeta: { fontSize: Typography.xs, color: Colors.textMuted },
   qtyEditRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginTop: 4 },
-  qtyInput: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary, backgroundColor: Colors.surface2, borderRadius: Radius.sm, paddingHorizontal: 6, paddingVertical: 2, minWidth: 40, textAlign: 'center' },
-  priceInput: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textPrimary, backgroundColor: Colors.surface2, borderRadius: Radius.sm, paddingHorizontal: 4, paddingVertical: 2, minWidth: 50 },
-  itemTotal:{ fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.amber },
+  qtyInput: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary, backgroundColor: Colors.surface2, borderRadius: Radius.sm, paddingHorizontal: 6, paddingVertical: 2, minWidth: 40, textAlign: 'center' },
+  priceInput: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textPrimary, backgroundColor: Colors.surface2, borderRadius: Radius.sm, paddingHorizontal: 4, paddingVertical: 2, minWidth: 50 },
+  itemTotal:{ fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.amber },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
   tLabel:   { fontSize: Typography.sm, color: Colors.textSecondary },
-  tVal:     { fontSize: Typography.sm, color: Colors.textPrimary, fontWeight: Typography.semibold },
+  tVal:     { fontSize: Typography.sm, color: Colors.textPrimary, fontFamily: Fonts.semibold },
   grandRow: { borderTopWidth: 1, borderColor: Colors.border, marginTop: Spacing.sm, paddingTop: Spacing.sm },
-  gLabel:   { fontSize: Typography.base, fontWeight: Typography.black, color: Colors.textPrimary },
-  gVal:     { fontSize: Typography.xl, fontWeight: Typography.black },
+  gLabel:   { fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.textPrimary },
+  gVal:     { fontSize: Typography.xl, fontFamily: Fonts.bold },
   emptyText: { fontSize: Typography.xs, color: Colors.textMuted, textAlign: 'center', paddingVertical: Spacing.md },
   notFoundSection: { marginTop: Spacing.md, paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.border + '33' },
-  nfHeader: { fontSize: 8, fontWeight: '900', color: Colors.danger, letterSpacing: 1, marginBottom: 8 },
+  nfHeader: { fontSize: 8, fontFamily: Fonts.bold, color: Colors.danger, letterSpacing: 1, marginBottom: 8 },
   nfRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   nfText: { fontSize: Typography.xs, color: Colors.textSecondary, fontStyle: 'italic' }
 });

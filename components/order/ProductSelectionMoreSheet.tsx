@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheet } from '@/lib/common/components/BottomSheet';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Fonts } from '@/constants/theme';
 
 interface ProductSelectionMoreSheetProps {
   visible: boolean;
@@ -76,5 +76,5 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     marginBottom: Spacing.sm,
   },
-  label: { flex: 1, fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  label: { flex: 1, fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary },
 });

@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
+import { Colors, Radius, Shadow, Spacing, DialogTheme } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { registerAppDialog } from '@/lib/common/utils/appAlert';
 
@@ -267,18 +267,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   title: {
-    fontSize: Typography.md,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    letterSpacing: -0.3,
+    ...DialogTheme.titleStyle,
   },
   message: {
-    fontSize: Typography.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
+    ...DialogTheme.messageStyle,
     marginTop: Spacing.sm,
-    lineHeight: 22,
     paddingHorizontal: Spacing.xs,
   },
   actions: {
@@ -310,8 +303,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   actionText: {
-    fontSize: Typography.sm,
-    fontWeight: '700',
+    ...DialogTheme.actionTextStyle,
   },
   actionTextPrimary: {
     color: Colors.white,

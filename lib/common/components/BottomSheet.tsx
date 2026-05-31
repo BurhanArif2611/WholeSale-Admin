@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Typography, Shadow } from '@/constants/theme';
+import { Colors, Radius, Spacing, Shadow, BottomSheetTheme } from '@/constants/theme';
 
 interface BottomSheetProps {
   visible: boolean;
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
-  title: { fontSize: Typography.md, fontWeight: '800', color: Colors.textPrimary },
+  title: BottomSheetTheme.titleStyle,
   body: { maxHeight: 420 },
   bodyContent: { padding: Spacing.xl, paddingTop: Spacing.md },
   footer: {

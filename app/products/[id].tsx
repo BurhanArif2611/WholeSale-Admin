@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { PromptModal } from '@/lib/common/components/PromptModal';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { Button } from '@/components/ui';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Spacing, Radius, formatCurrency, Typography } from '@/constants/theme';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { productRepository } from '@/lib/data/repositories/productRepository';
 import { inventoryRepository } from '@/lib/data/repositories/inventoryRepository';
@@ -38,6 +39,16 @@ export default function ProductDetailScreen() {
     >
       {product && (
         <>
+          {product.is_incomplete ? (
+            <Pressable
+              style={styles.incompleteBanner}
+              onPress={() => router.push(`/products/complete/${product.id}`)}
+            >
+              <Ionicons name="alert-circle" size={20} color={Colors.amber} />
+              <Text style={styles.incompleteBannerText}>{t('complete_product_banner')}</Text>
+              <Ionicons name="chevron-forward" size={18} color={Colors.amberDim} />
+            </Pressable>
+          ) : null}
           <PromptModal
             visible={showStockIn}
             title="Stock In"
@@ -94,6 +105,18 @@ function Stat({ label, value, highlight }: { label: string; value: string; highl
 }
 
 const styles = StyleSheet.create({
+  incompleteBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.amberBg,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.amber + '44',
+  },
+  incompleteBannerText: { flex: 1, fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.amberDim },
   meta: { fontSize: Typography.sm, color: Colors.textMuted, marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginVertical: Spacing.lg },
   stat: {
@@ -105,9 +128,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   statLabel: { fontSize: Typography.xs, color: Colors.textMuted },
-  statValue: { fontSize: Typography.sm, fontWeight: Typography.bold, marginTop: 4, color: Colors.textPrimary },
+  statValue: { fontSize: Typography.sm, fontFamily: Fonts.bold, marginTop: 4, color: Colors.textPrimary },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8 },
   label: { color: Colors.textSecondary, fontSize: Typography.sm },
-  value: { color: Colors.textPrimary, fontWeight: Typography.semibold },
+  value: { color: Colors.textPrimary, fontFamily: Fonts.semibold },
   notes: { color: Colors.textMuted, marginTop: Spacing.md, fontStyle: 'italic', fontSize: Typography.sm },
 });

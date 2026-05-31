@@ -12,9 +12,14 @@ export interface CartLineInput {
   order_unit: UnitType;
   quantity: number;
   unit_price: number;
+  purchase_price: number;
+  allow_discount: boolean;
+  max_discount_percent: number;
+  stock_quantity: number;
   discount_percent: number;
   tax_percent: number;
   line_total: number;
+  needs_discount_approval?: boolean;
   is_temporary?: boolean;
   notes?: string | null;
 }
@@ -72,6 +77,40 @@ export function setCartLineOrderUnit(cart: CartLineInput[], lineId: string, orde
   );
 }
 
+export function setCartLineDiscount(
+  cart: CartLineInput[],
+  lineId: string,
+  discountPercent: number,
+  needsApproval = false,
+): CartLineInput[] {
+  return cart.map((x) =>
+    x.line_id === lineId
+      ? recalcLine({ ...x, discount_percent: discountPercent, needs_discount_approval: needsApproval })
+      : x,
+  );
+}
+
+export function applyCartLineUpdate(
+  cart: CartLineInput[],
+  lineId: string,
+  quantity: number,
+  orderUnit: UnitType,
+  discountPercent: number,
+  needsApproval = false,
+): CartLineInput[] {
+  if (quantity <= 0) return cart.filter((x) => x.line_id !== lineId);
+  return cart.map((x) => {
+    if (x.line_id !== lineId) return x;
+    return recalcLine({
+      ...x,
+      quantity: roundQty(quantity, orderUnit),
+      order_unit: orderUnit,
+      discount_percent: discountPercent,
+      needs_discount_approval: needsApproval,
+    });
+  });
+}
+
 export function removeFromCart(cart: CartLineInput[], lineId: string): CartLineInput[] {
   return cart.filter((x) => x.line_id !== lineId);
 }
@@ -99,6 +138,10 @@ export function buildCatalogCartLine(params: {
   product_name: string;
   unit_type: UnitType;
   unit_price: number;
+  purchase_price?: number;
+  allow_discount?: boolean;
+  max_discount_percent?: number;
+  stock_quantity?: number;
   discount_percent?: number;
   tax_percent?: number;
   quantity?: number;
@@ -113,8 +156,13 @@ export function buildCatalogCartLine(params: {
     order_unit: params.order_unit ?? unit,
     quantity: params.quantity ?? 1,
     unit_price: params.unit_price,
+    purchase_price: params.purchase_price ?? 0,
+    allow_discount: params.allow_discount ?? false,
+    max_discount_percent: params.max_discount_percent ?? 0,
+    stock_quantity: params.stock_quantity ?? 0,
     discount_percent: params.discount_percent ?? 0,
     tax_percent: params.tax_percent ?? 0,
+    needs_discount_approval: false,
     is_temporary: false,
   });
 }
@@ -135,6 +183,10 @@ export function buildTempCartLine(params: {
     order_unit: unit,
     quantity: params.quantity,
     unit_price: params.unit_price,
+    purchase_price: 0,
+    allow_discount: false,
+    max_discount_percent: 0,
+    stock_quantity: 0,
     discount_percent: 0,
     tax_percent: 0,
     is_temporary: true,

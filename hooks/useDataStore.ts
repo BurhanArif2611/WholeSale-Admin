@@ -54,21 +54,35 @@ const debouncedNotifyAll = () => {
   }, 10);
 };
 
-export const clearCache = async () => {
+export const clearAllCaches = async (): Promise<void> => {
   globalStores = null;
   globalMaterials = null;
   globalOrders = null;
   globalSalesmen = null;
   currentOwnerId = null;
   lastFetchTime = 0;
-  
+  isFetching = false;
+
   if (salesmenSubscription) {
     supabase.removeChannel(salesmenSubscription);
     salesmenSubscription = null;
   }
-  // Note: We don't wipe disk on logout to support offline access for previous users
+
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const cacheKeys = keys.filter((k) => k.startsWith('wholesale_cache_'));
+    if (cacheKeys.length > 0) {
+      await AsyncStorage.multiRemove(cacheKeys);
+    }
+  } catch (e) {
+    console.warn('[useDataStore] Failed to clear disk cache:', e);
+  }
+
   notify();
 };
+
+/** @deprecated Use clearAllCaches */
+export const clearCache = clearAllCaches;
 
 export const addStoreOptimistic = (store: StoreWithLatestOrder) => {
   globalStores = [store, ...(globalStores || [])];

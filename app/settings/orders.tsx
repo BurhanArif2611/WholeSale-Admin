@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { SearchBar, EmptyState } from '@/components/ui';
 import { FormField } from '@/lib/common/components/FormField';
-import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
 import { orderRepository, type OrderListFilters, type OrderSortField } from '@/lib/data/repositories/orderRepository';
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   chipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  chipText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
+  chipText: { fontSize: 12, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   chipTextActive: { color: Colors.white },
   dateToggle: {
     flexDirection: 'row',
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
   },
-  dateToggleText: { fontSize: Typography.sm, fontWeight: '700', color: Colors.textSecondary },
+  dateToggleText: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textSecondary },
   dateToggleHint: { color: Colors.textMuted },
   dateFields: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.sm },
   sortRow: {
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.sm,
   },
-  sortLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '700' },
+  sortLabel: { fontSize: 11, color: Colors.textMuted, fontFamily: Fonts.bold },
   sortChip: {
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   sortChipActive: { borderColor: Colors.amber, backgroundColor: Colors.amberBg },
-  sortChipText: { fontSize: 11, fontWeight: '600', color: Colors.textSecondary },
+  sortChipText: { fontSize: 11, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   sortChipTextActive: { color: Colors.amberDim },
   list: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xxl },
   card: {
@@ -242,9 +242,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     ...Shadow.sm,
   },
-  name: { fontWeight: '800', color: Colors.textPrimary },
+  name: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   meta: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
-  statusLine: { fontSize: 10, color: Colors.textSecondary, marginTop: 4, textTransform: 'uppercase', fontWeight: '600' },
-  total: { fontWeight: '800', color: Colors.textPrimary },
-  cancel: { fontSize: 11, color: Colors.danger, marginTop: 6, fontWeight: '600' },
+  statusLine: { fontSize: 10, color: Colors.textSecondary, marginTop: 4, textTransform: 'uppercase', fontFamily: Fonts.semibold },
+  total: { fontFamily: Fonts.bold, color: Colors.textPrimary },
+  cancel: { fontSize: 11, color: Colors.danger, marginTop: 6, fontFamily: Fonts.semibold },
 });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, formatCurrency, Typography } from '@/constants/theme';
+import { IncompleteProductBadge } from '@/lib/common/components/IncompleteProductBadge';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { formatQuantityDisplay } from '@/lib/common/utils/quantity';
 import type { Product } from '@/lib/domain/models';
 
@@ -29,7 +30,7 @@ export function CompactProductRow({
 
   return (
     <Pressable
-      style={[styles.row, inCart && styles.rowInCart]}
+      style={[styles.row, inCart && styles.rowInCart, product.is_incomplete && styles.rowIncomplete]}
       onPress={inCart ? onOpenDetail : onAdd}
     >
       <View style={[styles.icon, lowStock && styles.iconLow]}>
@@ -40,6 +41,12 @@ export function CompactProductRow({
         <Text style={styles.name} numberOfLines={1}>
           {product.name}
         </Text>
+        {product.is_incomplete ? (
+          <View style={styles.badgeRow}>
+            <IncompleteProductBadge compact variant="draft" />
+            <IncompleteProductBadge compact variant="pending" />
+          </View>
+        ) : null}
         <View style={styles.metaRow}>
           <Text style={styles.price}>
             {formatCurrency(product.selling_price)}/{product.unit_type}
@@ -89,6 +96,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.borderLight,
   },
   rowInCart: { backgroundColor: Colors.amberBg + '99' },
+  rowIncomplete: { borderLeftWidth: 3, borderLeftColor: Colors.amber },
   icon: {
     width: 36,
     height: 36,
@@ -100,11 +108,12 @@ const styles = StyleSheet.create({
   },
   iconLow: { backgroundColor: Colors.dangerBg },
   info: { flex: 1, minWidth: 0, paddingRight: Spacing.xs },
-  name: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  name: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2, marginBottom: 2 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 2 },
-  price: { fontSize: 11, fontWeight: Typography.semibold, color: Colors.amber },
+  price: { fontSize: 11, fontFamily: Fonts.semibold, color: Colors.amber },
   stock: { fontSize: 10, color: Colors.textMuted },
-  stockLow: { color: Colors.danger, fontWeight: Typography.semibold },
+  stockLow: { color: Colors.danger, fontFamily: Fonts.semibold },
   addBtn: {
     width: 36,
     height: 36,
@@ -129,5 +138,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   qtyVal: { minWidth: 44, paddingHorizontal: 4, alignItems: 'center' },
-  qtyText: { fontSize: 11, fontWeight: Typography.bold, color: Colors.amberDim },
+  qtyText: { fontSize: 11, fontFamily: Fonts.bold, color: Colors.amberDim },
 });

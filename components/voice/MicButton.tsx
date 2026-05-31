@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, Animated, StyleSheet, PanResponderInstance } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Gradients } from '@/constants/theme';
+import { Colors, Typography, Spacing, Gradients, Fonts } from '@/constants/theme';
 
 interface MicButtonProps {
   isHolding: boolean;
@@ -71,5 +71,5 @@ const styles = StyleSheet.create({
   glowRing:     { width: 104, height: 104, borderRadius: 52, borderWidth: 2, backgroundColor: 'transparent' },
   micBtn:       { width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 15, elevation: 14 },
   micBtnActive: { elevation: 20 },
-  micLabel:     { marginTop: Spacing.lg, fontSize: Typography.sm, fontWeight: Typography.bold, letterSpacing: 0.5 },
+  micLabel:     { marginTop: Spacing.lg, fontSize: Typography.sm, fontFamily: Fonts.bold, letterSpacing: 0.5 },
 });

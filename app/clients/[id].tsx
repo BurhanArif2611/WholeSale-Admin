@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Linking, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
-import { Colors, Spacing, Radius, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { clientRepository } from '@/lib/data/repositories/clientRepository';
 import { orderRepository } from '@/lib/data/repositories/orderRepository';
@@ -112,19 +112,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  chipText: { fontSize: Typography.xs, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  chipText: { fontSize: Typography.xs, fontFamily: Fonts.semibold, color: Colors.textPrimary },
   card: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
   },
-  cardLabel: { fontSize: Typography.xs, color: Colors.textMuted, fontWeight: Typography.semibold },
-  pending: { fontSize: 28, fontWeight: Typography.black, color: Colors.danger, marginVertical: 4 },
+  cardLabel: { fontSize: Typography.xs, color: Colors.textMuted, fontFamily: Fonts.semibold },
+  pending: { fontSize: 28, fontFamily: Fonts.bold, color: Colors.danger, marginVertical: 4 },
   cardSub: { fontSize: Typography.xs, color: Colors.textSecondary },
   section: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     marginBottom: Spacing.sm,
     color: Colors.textPrimary,
   },
@@ -134,6 +134,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     marginBottom: Spacing.sm,
   },
-  itemTitle: { fontWeight: Typography.bold, color: Colors.textPrimary },
+  itemTitle: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   muted: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
 });

@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients, Layout } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Gradients, Layout, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { removeSalesmanFromFirm } from '@/lib/api';
 import { useDataStore } from '@/hooks/useDataStore';
@@ -169,14 +169,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 18, fontWeight: Typography.black, color: Colors.info },
-  name: { fontSize: 17, fontWeight: Typography.bold, color: Colors.textPrimary },
+  avatarText: { fontSize: 18, fontFamily: Fonts.bold, color: Colors.info },
+  name: { fontSize: 17, fontFamily: Fonts.bold, color: Colors.textPrimary },
   activeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.success },
-  role: { fontSize: 12, color: Colors.textSecondary, fontWeight: '500' },
+  role: { fontSize: 12, color: Colors.textSecondary, fontFamily: Fonts.medium },
   deleteBtn: { padding: 8 },
   empty: { alignItems: 'center', marginTop: 100, gap: Spacing.md },
-  emptyText: { fontSize: 16, color: Colors.textMuted, fontWeight: '500' },
+  emptyText: { fontSize: 16, color: Colors.textMuted, fontFamily: Fonts.medium },
   
   header: {
     paddingHorizontal: Layout.screenPaddingH,
@@ -188,8 +188,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, 
     borderRadius: Radius.xl, backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border
   },
-  codeLabel: { fontSize: 11, color: Colors.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '900', marginBottom: 4 },
-  codeValue: { fontSize: 28, fontWeight: Typography.black, color: Colors.textPrimary, letterSpacing: 3 },
+  codeLabel: { fontSize: 11, color: Colors.textMuted, textTransform: 'uppercase', letterSpacing: 1.2, fontFamily: Fonts.bold, marginBottom: 4 },
+  codeValue: { fontSize: 28, fontFamily: Fonts.bold, color: Colors.textPrimary, letterSpacing: 3 },
   codeIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.white, alignItems: 'center', justifyContent: 'center', ...Shadow.sm },
   codeHint: { fontSize: 11, color: Colors.textSecondary, marginTop: Spacing.md, fontStyle: 'italic', textAlign: 'center' },
 });

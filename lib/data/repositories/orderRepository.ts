@@ -28,6 +28,7 @@ function rowToOrder(row: Record<string, unknown>): Order {
     delivery_date: (row.delivery_date as string) ?? null,
     delivery_address: (row.delivery_address as string) ?? null,
     notes: (row.notes as string) ?? null,
+    discount_approval_status: (row.discount_approval_status as Order['discount_approval_status']) ?? 'none',
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   };
@@ -76,6 +77,7 @@ export interface CreateOrderInput {
   order_discount_amount?: number;
   /** Persist discount on client profile for future orders */
   save_client_discount?: boolean;
+  discount_approval_status?: Order['discount_approval_status'];
 }
 
 export type OrderSortField = 'date' | 'amount' | 'client';
@@ -160,6 +162,14 @@ export const orderRepository = {
     return rows.map(rowToItem);
   },
 
+  async countPendingDiscountApproval(): Promise<number> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{ c: number }>(
+      `SELECT COUNT(*) as c FROM orders WHERE discount_approval_status = 'pending' AND status != 'cancelled'`,
+    );
+    return row?.c ?? 0;
+  },
+
   async create(input: CreateOrderInput): Promise<Order> {
     const client = await clientRepository.findById(input.client_id);
     if (!client) throw new Error('Client not found');
@@ -202,15 +212,18 @@ export const orderRepository = {
     const remaining = Math.max(0, grandTotal - paidAmount);
     const paymentStatus: PaymentStatus =
       paidAmount >= grandTotal ? 'paid' : paidAmount > 0 ? 'partial' : 'pending';
+    const approvalStatus = input.discount_approval_status ?? 'none';
+    const orderStatus = approvalStatus === 'pending' ? 'new' : 'confirmed';
 
     await runInTransaction(async (db) => {
       await db.runAsync(
-        `INSERT INTO orders (id, client_id, client_name, status, payment_status, payment_mode, subtotal, tax_total, discount_total, order_discount_type, order_discount_value, order_discount_amount, grand_total, paid_amount, remaining_amount, delivery_date, delivery_address, notes, created_at, updated_at)
-         VALUES (?, ?, ?, 'confirmed', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO orders (id, client_id, client_name, status, payment_status, payment_mode, subtotal, tax_total, discount_total, order_discount_type, order_discount_value, order_discount_amount, grand_total, paid_amount, remaining_amount, delivery_date, delivery_address, notes, discount_approval_status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           client.id,
           client.name,
+          orderStatus,
           paymentStatus,
           input.payment_mode ?? null,
           subtotal,
@@ -225,6 +238,7 @@ export const orderRepository = {
           input.delivery_date ?? null,
           input.delivery_address ?? client.address,
           input.notes ?? null,
+          approvalStatus,
           now,
           now,
         ],

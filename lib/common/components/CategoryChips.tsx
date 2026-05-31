@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Fonts } from '@/constants/theme';
 import type { Category } from '@/lib/domain/models';
 
 interface CategoryChipsProps {
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
   chipText: {
     fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textSecondary,
   },
   chipTextActive: { color: Colors.white },

@@ -41,6 +41,7 @@ export function unitLabel(unit: UnitType): string {
     piece: 'Piece',
     box: 'Box',
     packet: 'Packet',
+    carton: 'Carton',
     meter: 'Meter',
   };
   return labels[unit] ?? unit;

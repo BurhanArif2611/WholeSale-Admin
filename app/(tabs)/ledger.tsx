@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView } from '
 import { Ionicons } from '@expo/vector-icons';
 import { PromptModal } from '@/lib/common/components/PromptModal';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
-import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography, Layout, Fonts } from '@/constants/theme';
 import { EmptyState, SectionHeader } from '@/components/ui';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -164,13 +164,13 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: Typography.xs,
     color: Colors.textMuted,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   summaryValue: {
     fontSize: Typography.xxl,
-    fontWeight: Typography.black,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginVertical: Spacing.xs,
   },
@@ -194,13 +194,13 @@ const styles = StyleSheet.create({
     ...Shadow.sm,
   },
   clientChipName: {
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
     color: Colors.textPrimary,
   },
   clientChipAmt: {
     color: Colors.danger,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
     marginTop: Spacing.xs,
   },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   payHintText: {
     fontSize: 10,
     color: Colors.amber,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   noPending: {
     color: Colors.textMuted,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   rowBody: { flex: 1 },
   rowTitle: {
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
     color: Colors.textPrimary,
   },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   rowEnd: { alignItems: 'flex-end' },
   rowAmt: {
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
   },
   balance: {

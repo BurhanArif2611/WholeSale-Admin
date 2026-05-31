@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Gradients, Fonts } from '@/constants/theme';
 import { Button } from './ui';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: Typography.black,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 4,
   },
   status: {
     fontSize: 24,
-    fontWeight: '900',
+    fontFamily: Fonts.bold,
     color: Colors.amber,
     letterSpacing: 2,
     marginBottom: Spacing.xl,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   featureDesc: {

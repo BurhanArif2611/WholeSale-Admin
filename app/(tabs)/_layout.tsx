@@ -17,7 +17,10 @@ import {
   Radius,
   Spacing,
   Shadow,
-} from "@/constants/theme";
+  Fonts,
+  AppBarTheme,
+  TabBarTheme,
+} from '@/constants/theme';
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -89,33 +92,15 @@ export default function TabLayout() {
       <Tabs
         key={`tabs-${localeRevision}`}
         screenOptions={{
-          headerStyle: { backgroundColor: Colors.bg },
-          headerTintColor: Colors.textPrimary,
-          headerTitleStyle: {
-            fontWeight: Typography.bold as any,
-            fontSize: Typography.base,
-            color: Colors.textPrimary,
-            letterSpacing: Typography.tight,
-          },
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-          tabBarStyle: {
-            backgroundColor: Colors.surface,
-            borderTopColor: Colors.border,
-            borderTopWidth: 1,
-            height: 68,
-            paddingBottom: 10,
-            paddingTop: 6,
-            elevation: 0,
-          },
-          tabBarActiveTintColor: Colors.amber,
-          tabBarInactiveTintColor: Colors.textMuted,
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: "600",
-            letterSpacing: 0.4,
-            marginTop: 2,
-          },
+          headerStyle: AppBarTheme.headerStyle,
+          headerTintColor: AppBarTheme.tintColor,
+          headerTitleStyle: AppBarTheme.titleStyle,
+          headerShadowVisible: AppBarTheme.headerShadowVisible,
+          headerTitleAlign: AppBarTheme.headerTitleAlign,
+          tabBarStyle: TabBarTheme.style,
+          tabBarActiveTintColor: TabBarTheme.activeTintColor,
+          tabBarInactiveTintColor: TabBarTheme.inactiveTintColor,
+          tabBarLabelStyle: TabBarTheme.labelStyle,
         }}
       >
         <Tabs.Screen
@@ -221,9 +206,9 @@ const styles = StyleSheet.create({
   },
   brandText: {
     fontSize: 20,
-    fontWeight: Typography.black as any,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: Typography.tight,
   },
   langTrigger: {
     padding: 8,

@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Shadow, STATUS_CONFIG, Gradients } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, STATUS_CONFIG, Gradients, Fonts, InputDecorationTheme, TextTheme, ElevatedButtonTheme } from '@/constants/theme';
 import type { OrderStatus } from '@/types';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -438,7 +438,7 @@ export const DashboardSkeleton = React.memo(({ message }: { message?: string }) 
           <Text style={{ 
             color: Colors.textPrimary, 
             fontSize: Typography.base, 
-            fontWeight: '800', 
+            fontFamily: Fonts.bold, 
             letterSpacing: 1,
             marginBottom: 8 
           }}>
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeDot:  { width: 5, height: 5, borderRadius: 2.5 },
-  badgeText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  badgeText: { fontSize: 10, fontFamily: Fonts.bold, letterSpacing: 0.5 },
 
   gradCard: {
     borderRadius: Radius.xl,
@@ -664,28 +664,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   btnInner: { flexDirection: 'row', alignItems: 'center' },
-  btnText:  { fontWeight: Typography.bold, letterSpacing: 0.3 },
+  btnText: ElevatedButtonTheme.textStyle,
 
   inputWrapper: { marginBottom: Spacing.md },
   inputLabel: {
-    fontSize: Typography.xs,
-    fontWeight: Typography.bold,
-    color: Colors.textSecondary,
+    ...TextTheme.label,
     marginBottom: Spacing.xs,
-    letterSpacing: 0.3,
   },
   requiredMark: { color: Colors.danger },
   inputHint: {
-    fontSize: Typography.xs,
-    color: Colors.textMuted,
+    ...TextTheme.caption,
     marginBottom: Spacing.xs,
-    lineHeight: 18,
   },
   inputError: {
-    fontSize: Typography.xs,
-    color: Colors.danger,
+    ...TextTheme.error,
     marginTop: Spacing.xs,
-    fontWeight: Typography.semibold,
   },
   inputRow: {
     position: 'relative',
@@ -717,12 +710,13 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: 'transparent',
     borderWidth: 0,
-    borderRadius: Radius.lg,
+    borderRadius: InputDecorationTheme.borderRadius,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm + 2,
-    fontSize: Typography.sm,
-    color: Colors.textPrimary,
-    minHeight: 48,
+    fontFamily: InputDecorationTheme.fontFamily,
+    fontSize: InputDecorationTheme.fontSize,
+    color: InputDecorationTheme.color,
+    minHeight: InputDecorationTheme.minHeight,
   },
   inputDisabled: { color: Colors.textMuted },
 
@@ -741,10 +735,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.amber,
     borderWidth: 1.5,
   },
-  searchInput: { flex: 1, fontSize: Typography.sm, color: Colors.textPrimary, minHeight: 24 },
+  searchInput: {
+    flex: 1,
+    fontFamily: InputDecorationTheme.fontFamily,
+    fontSize: InputDecorationTheme.fontSize,
+    color: InputDecorationTheme.color,
+    minHeight: 24,
+  },
   searchHint: {
-    fontSize: Typography.xs,
-    color: Colors.textMuted,
+    ...TextTheme.caption,
     marginBottom: Spacing.sm,
     marginLeft: Spacing.xs,
   },
@@ -754,9 +753,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', marginBottom: Spacing.lg,
   },
   sectionTitle: {
+    ...TextTheme.cardTitle,
     fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: Colors.textPrimary,
     letterSpacing: Typography.tight,
   },
 
@@ -772,10 +770,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.7)',
     ...Shadow.sm,
   },
-  emptyText: {
-    fontSize: Typography.sm, color: Colors.textSecondary,
-    textAlign: 'center', letterSpacing: 0.5,
-  },
+  emptyText: TextTheme.emptyState,
 
 
   statCard: {
@@ -787,7 +782,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     marginBottom: Spacing.md,
   },
-  statValue: { fontSize: Typography.xl, fontWeight: Typography.black, marginBottom: 2 },
+  statValue: { fontSize: Typography.xl, fontFamily: Fonts.bold, marginBottom: 2 },
   statLabel: { fontSize: Typography.xs, color: Colors.textSecondary, letterSpacing: 0.5 },
 
   rowItem: {
@@ -796,7 +791,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
   },
   rowLabel: { fontSize: Typography.sm, color: Colors.textSecondary },
-  rowValue: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  rowValue: { fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary },
 
   divider: { height: 1, backgroundColor: Colors.borderLight, marginVertical: Spacing.lg },
 
@@ -822,7 +817,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: Colors.white,
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
   },
   quickCreateCard: {
     flexDirection: 'row',
@@ -845,14 +840,14 @@ const styles = StyleSheet.create({
   },
   quickCreateTag: {
     fontSize: 9,
-    fontWeight: '900',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     letterSpacing: 1,
     marginBottom: 2,
   },
   quickCreateLabel: {
     fontSize: Typography.base,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   quickCreateBadge: {
@@ -866,7 +861,7 @@ const styles = StyleSheet.create({
   },
   quickCreateBadgeText: {
     fontSize: 9,
-    fontWeight: '900',
+    fontFamily: Fonts.bold,
     color: Colors.amber,
   },
 });

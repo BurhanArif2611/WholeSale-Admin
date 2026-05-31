@@ -3,9 +3,10 @@ import { View, Text, ScrollView, StyleSheet, RefreshControl, Pressable, Dimensio
 import { useRouter, Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Layout, Fonts } from '@/constants/theme';
 import { ModuleCard } from '@/lib/common/components/ModuleCard';
 import { useDatabase } from '@/hooks/useDatabase';
+import { useLanguage } from '@/hooks/useLanguage';
 import { dashboardRepository } from '@/lib/data/repositories/dashboardRepository';
 import type { DashboardStats } from '@/lib/domain/models';
 
@@ -25,6 +26,7 @@ const MODULES = [
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { isReady, refreshKey } = useDatabase();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -65,6 +67,36 @@ export default function DashboardScreen() {
         <StatBox label="Orders" value={String(stats?.totalOrders ?? 0)} color={Colors.info} />
         <StatBox label="Outstanding" value={formatCurrency(stats?.pendingAmount ?? 0)} color={Colors.danger} />
       </View>
+
+      {(stats?.incompleteProductCount ?? 0) > 0 ? (
+        <Pressable style={styles.incompleteCard} onPress={() => router.push('/products/incomplete' as Href)}>
+          <View style={styles.incompleteIcon}>
+            <Ionicons name="alert-circle" size={22} color={Colors.amber} />
+          </View>
+          <View style={styles.incompleteBody}>
+            <Text style={styles.incompleteTitle}>
+              {t('dashboard_incomplete_products').replace('{count}', String(stats?.incompleteProductCount ?? 0))}
+            </Text>
+            <Text style={styles.incompleteSub}>{t('dashboard_incomplete_sub')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+        </Pressable>
+      ) : null}
+
+      {(stats?.pendingDiscountApprovalCount ?? 0) > 0 ? (
+        <Pressable style={styles.approvalCard} onPress={() => router.push('/(tabs)/orders' as Href)}>
+          <View style={styles.incompleteIcon}>
+            <Ionicons name="shield-outline" size={22} color={Colors.info} />
+          </View>
+          <View style={styles.incompleteBody}>
+            <Text style={styles.incompleteTitle}>
+              {t('dashboard_pending_approvals').replace('{count}', String(stats?.pendingDiscountApprovalCount ?? 0))}
+            </Text>
+            <Text style={styles.incompleteSub}>{t('dashboard_pending_approvals_sub')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+        </Pressable>
+      ) : null}
 
       <Text style={styles.sectionTitle}>Quick Modules</Text>
       <View style={styles.grid}>
@@ -134,11 +166,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   content: { paddingHorizontal: Layout.screenPaddingH, paddingTop: Spacing.md, paddingBottom: Layout.screenPaddingBottom },
   hero: { borderRadius: Radius.xl, padding: Spacing.xl, marginBottom: Spacing.lg, ...Shadow.md },
-  heroLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  heroValue: { color: Colors.white, fontSize: 36, fontWeight: '900', marginVertical: 8 },
+  heroLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontFamily: Fonts.bold, letterSpacing: 1 },
+  heroValue: { color: Colors.white, fontSize: 36, fontFamily: Fonts.bold, marginVertical: 8 },
   heroRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.full },
-  chipText: { color: Colors.white, fontSize: 11, fontWeight: '600' },
+  chipText: { color: Colors.white, fontSize: 11, fontFamily: Fonts.semibold },
   statsRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },
   statBox: {
     flex: 1,
@@ -148,14 +180,49 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     ...Shadow.sm,
   },
-  statLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '600' },
-  statValue: { fontSize: Typography.md, fontWeight: '800', color: Colors.textPrimary, marginTop: 4 },
-  sectionTitle: { fontSize: Typography.sm, fontWeight: '800', color: Colors.textPrimary, marginBottom: Spacing.md },
+  statLabel: { fontSize: 11, color: Colors.textMuted, fontFamily: Fonts.semibold },
+  statValue: { fontSize: Typography.md, fontFamily: Fonts.bold, color: Colors.textPrimary, marginTop: 4 },
+  incompleteCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.amberBg,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.amber + '44',
+    ...Shadow.sm,
+  },
+  incompleteIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  incompleteBody: { flex: 1 },
+  incompleteTitle: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
+  incompleteSub: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
+  approvalCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.infoBg,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.info + '33',
+    ...Shadow.sm,
+  },
+  sectionTitle: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary, marginBottom: Spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginBottom: Spacing.xl },
   empty: { alignItems: 'center', padding: Spacing.xl, backgroundColor: Colors.surface, borderRadius: Radius.lg },
   emptyText: { color: Colors.textMuted, marginTop: 8, textAlign: 'center' },
   emptyBtn: { marginTop: Spacing.md, backgroundColor: Colors.amber, paddingHorizontal: 20, paddingVertical: 10, borderRadius: Radius.md },
-  emptyBtnText: { color: Colors.white, fontWeight: '700' },
+  emptyBtnText: { color: Colors.white, fontFamily: Fonts.bold },
   orderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -166,8 +233,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     ...Shadow.sm,
   },
-  orderClient: { fontWeight: '700', color: Colors.textPrimary },
+  orderClient: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   orderMeta: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
-  orderTotal: { fontWeight: '800', color: Colors.textPrimary },
-  orderStatus: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', marginTop: 2 },
+  orderTotal: { fontFamily: Fonts.bold, color: Colors.textPrimary },
+  orderStatus: { fontSize: 10, fontFamily: Fonts.bold, textTransform: 'uppercase', marginTop: 2 },
 });

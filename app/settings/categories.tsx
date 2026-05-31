@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { Button } from '@/components/ui';
 import { BusinessCategoryGrid } from '@/components/onboarding/BusinessCategoryGrid';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors, Spacing, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useBusinessCategories } from '@/hooks/useBusinessCategories';
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   section: { paddingTop: Spacing.md, paddingBottom: Spacing.sm },
   sectionTitle: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   toggleText: { flex: 1 },
-  toggleLabel: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  toggleLabel: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   toggleSub: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 4 },
   prioritySection: { marginBottom: Spacing.sm },
   priorityRow: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   priorityIndex: {
     width: 22,
     fontSize: Typography.xs,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.amberDim,
   },
   priorityName: { flex: 1, fontSize: Typography.sm, color: Colors.textPrimary },

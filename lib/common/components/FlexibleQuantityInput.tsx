@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Pressable, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Typography, formatCurrency } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, formatCurrency, Fonts } from '@/constants/theme';
 import { getCompatibleOrderUnits } from '@/lib/common/utils/pricing';
 import { formatQuantityDisplay, parseDecimalQuantity, quantityStepForUnit, unitLabel } from '@/lib/common/utils/quantity';
 import type { UnitType } from '@/lib/domain/models';
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     textAlign: 'center',
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     backgroundColor: Colors.white,
     paddingHorizontal: 4,
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.amber + '44',
   },
   unitChipCompact: { paddingHorizontal: 6, paddingVertical: 4 },
-  unitChipText: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.amberDim },
+  unitChipText: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.amberDim },
   lineTotal: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.amber,
     marginLeft: Spacing.xs,
   },
@@ -200,5 +200,5 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.borderLight,
   },
   unitRowActive: { backgroundColor: Colors.amberBg },
-  unitRowText: { fontSize: Typography.sm, color: Colors.textPrimary, fontWeight: Typography.semibold },
+  unitRowText: { fontSize: Typography.sm, color: Colors.textPrimary, fontFamily: Fonts.semibold },
 });

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Radius, formatCurrency } from '@/constants/theme';
+import { Colors, Typography, Radius, formatCurrency, Fonts } from '@/constants/theme';
 import { createMaterial } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   compactLabel: {
     fontSize: 9,
-    fontWeight: '900',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     marginBottom: 2,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   subtotalText: {
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: Fonts.bold,
     color: '#1E293B',
     marginRight: 4,
   },
@@ -366,6 +366,6 @@ const styles = StyleSheet.create({
   unitBtnText: {
     fontSize: 13,
     color: '#1E293B',
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheet } from '@/lib/common/components/BottomSheet';
-import { Colors, Spacing, Radius, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { formatQuantityDisplay, unitLabel } from '@/lib/common/utils/quantity';
 import type { CartLineInput } from '@/lib/common/utils/cart';
 
@@ -83,10 +83,10 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   lineBody: { flex: 1 },
-  lineName: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  lineName: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   temp: { color: Colors.info, fontSize: Typography.xs },
   lineMeta: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
-  lineTotal: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.amber },
+  lineTotal: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.amber },
   checkoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -96,5 +96,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: Radius.full,
   },
-  checkoutText: { color: Colors.white, fontSize: Typography.sm, fontWeight: Typography.black },
+  checkoutText: { color: Colors.white, fontSize: Typography.sm, fontFamily: Fonts.bold },
 });

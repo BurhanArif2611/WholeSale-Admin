@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Shadow } from '@/constants/theme';
+import { Colors, Shadow, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -188,11 +188,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   logoGradient: { flex: 1, borderRadius: 60, alignItems: 'center', justifyContent: 'center' },
-  brandTitle: { fontSize: 32, fontWeight: '900', color: '#263238', letterSpacing: -0.5 },
-  brandTagline: { fontSize: 13, color: '#78909C', marginTop: 8, fontWeight: '600' },
+  brandTitle: { fontSize: 32, fontFamily: Fonts.bold, color: '#263238', letterSpacing: -0.5 },
+  brandTagline: { fontSize: 13, color: '#78909C', marginTop: 8, fontFamily: Fonts.semibold },
 
   actionSection: { width: '100%', alignItems: 'center' },
-  welcomeText: { fontSize: 24, fontWeight: '800', color: '#263238', marginBottom: 8 },
+  welcomeText: { fontSize: 24, fontFamily: Fonts.bold, color: '#263238', marginBottom: 8 },
   subText: { fontSize: 14, color: '#90A4AE', textAlign: 'center', marginBottom: 32, paddingHorizontal: 10 },
   
   otpContainer: { 
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ECEFF1',
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: '#263238',
     textAlign: 'center',
   },
@@ -232,11 +232,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  primaryBtnText: { fontSize: 18, fontWeight: '800', color: Colors.white },
+  primaryBtnText: { fontSize: 18, fontFamily: Fonts.bold, color: Colors.white },
 
   resendContainer: { marginTop: 24, alignItems: 'center' },
-  resendTextDisabled: { color: '#B0BEC5', fontSize: 14, fontWeight: '600' },
-  resendTextActive: { color: '#FFA000', fontSize: 14, fontWeight: '700', textDecorationLine: 'underline' },
+  resendTextDisabled: { color: '#B0BEC5', fontSize: 14, fontFamily: Fonts.semibold },
+  resendTextActive: { color: '#FFA000', fontSize: 14, fontFamily: Fonts.bold, textDecorationLine: 'underline' },
 
   backBtn: {
     flexDirection: 'row',
@@ -245,5 +245,5 @@ const styles = StyleSheet.create({
     marginTop: 40,
     gap: 6,
   },
-  backBtnText: { fontSize: 14, color: '#78909C', fontWeight: '600' },
+  backBtnText: { fontSize: 14, color: '#78909C', fontFamily: Fonts.semibold },
 });

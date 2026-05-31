@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Typography, Shadow } from '@/constants/theme';
+import { Colors, Radius, Spacing, Typography, Shadow, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 
 interface PromptModalProps {
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.md,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  cancelText: { color: Colors.textSecondary, fontWeight: '700', fontSize: Typography.sm },
+  cancelText: { color: Colors.textSecondary, fontFamily: Fonts.bold, fontSize: Typography.sm },
   okBtn: {
     paddingHorizontal: Spacing.xl,
     paddingVertical: 12,
@@ -152,5 +152,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.amber,
     ...Shadow.sm,
   },
-  okText: { color: Colors.white, fontWeight: '800', fontSize: Typography.sm },
+  okText: { color: Colors.white, fontFamily: Fonts.bold, fontSize: Typography.sm },
 });

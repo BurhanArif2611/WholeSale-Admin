@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SearchBar } from '@/components/ui';
 import { CategoryChips } from '@/lib/common/components/CategoryChips';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Fonts } from '@/constants/theme';
 import type { Category, ProductSortField, SortDirection } from '@/lib/domain/models';
 
 const SORT_OPTIONS: { field: ProductSortField; label: string }[] = [
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     paddingBottom: Spacing.xs,
   },
-  sortLabel: { fontSize: Typography.xs, color: Colors.textMuted, fontWeight: Typography.semibold },
+  sortLabel: { fontSize: Typography.xs, color: Colors.textMuted, fontFamily: Fonts.semibold },
   sortChip: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
@@ -95,6 +95,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   sortChipActive: { borderColor: Colors.amber, backgroundColor: Colors.amberBg },
-  sortChipText: { fontSize: Typography.xs, color: Colors.textSecondary, fontWeight: Typography.semibold },
+  sortChipText: { fontSize: Typography.xs, color: Colors.textSecondary, fontFamily: Fonts.semibold },
   sortChipTextActive: { color: Colors.amberDim },
 });

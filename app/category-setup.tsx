@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/lib/common/components/ScreenHeader';
 import { Button } from '@/components/ui';
 import { BusinessCategoryGrid } from '@/components/onboarding/BusinessCategoryGrid';
-import { Colors, Spacing, Gradients, Typography } from '@/constants/theme';
+import { Colors, Spacing, Gradients, Typography, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   progressDotDone: { backgroundColor: Colors.success },
   progressDotActive: { backgroundColor: Colors.amber, width: 24, borderRadius: 5 },
-  progressLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '700' },
+  progressLabel: { fontSize: 11, color: Colors.textMuted, fontFamily: Fonts.bold },
   gridWrap: { flex: 1, minHeight: 0, paddingHorizontal: Spacing.md },
   footer: {
     paddingHorizontal: Spacing.md,
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   validation: {
     fontSize: Typography.xs,
     color: Colors.danger,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     textAlign: 'center',
     marginBottom: Spacing.sm,
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   selectionHint: {
     fontSize: Typography.xs,
     color: Colors.success,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     textAlign: 'center',
     marginBottom: Spacing.sm,
   },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: Typography.sm,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textMuted,
   },
 });

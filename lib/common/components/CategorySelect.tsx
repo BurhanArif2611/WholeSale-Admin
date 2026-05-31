@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SearchBar } from '@/components/ui';
-import { Colors, Spacing, Radius, Shadow, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import type { Category } from '@/lib/domain/models';
 
@@ -163,9 +163,9 @@ export function CategorySelect({
 const styles = StyleSheet.create({
   wrap: { marginBottom: Spacing.md },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
-  label: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textSecondary },
+  label: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textSecondary },
   manageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  manageText: { fontSize: Typography.xs, color: Colors.amber, fontWeight: Typography.semibold },
+  manageText: { fontSize: Typography.xs, color: Colors.amber, fontFamily: Fonts.semibold },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -183,10 +183,10 @@ const styles = StyleSheet.create({
   fieldSelected: { borderColor: Colors.amber + '66' },
   selectedRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingRight: Spacing.sm },
   catDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.amber },
-  selectedText: { flex: 1, fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  selectedText: { flex: 1, fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary },
   presetTag: {
     fontSize: 9,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     backgroundColor: Colors.surface2,
     paddingHorizontal: 6,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   placeholder: { flex: 1, fontSize: Typography.sm, color: Colors.textMuted },
-  errorText: { color: Colors.danger, fontSize: Typography.xs, marginTop: Spacing.xs, fontWeight: Typography.semibold },
+  errorText: { color: Colors.danger, fontSize: Typography.xs, marginTop: Spacing.xs, fontFamily: Fonts.semibold },
   hint: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: Spacing.xs, fontStyle: 'italic' },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  sheetTitle: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary },
+  sheetTitle: { fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.textPrimary },
   searchWrap: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
   option: {
     flexDirection: 'row',
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.borderLight,
   },
   optionActive: { backgroundColor: Colors.amberBg },
-  optionText: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  optionText: { fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary },
   optionTextActive: { color: Colors.amberDim },
   optionMeta: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
   empty: { textAlign: 'center', color: Colors.textMuted, padding: Spacing.xl },
@@ -237,5 +237,5 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
-  addNewText: { fontSize: Typography.sm, color: Colors.amber, fontWeight: Typography.bold },
+  addNewText: { fontSize: Typography.sm, color: Colors.amber, fontFamily: Fonts.bold },
 });

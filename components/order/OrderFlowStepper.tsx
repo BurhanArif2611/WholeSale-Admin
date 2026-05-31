@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, LayoutChangeEvent, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors, Spacing, Typography, Fonts } from '@/constants/theme';
 
 export interface OrderFlowStepConfig {
   key: string;
@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 9,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textMuted,
     textAlign: 'center',
   },
   labelActive: {
     fontSize: 10,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.amberDim,
   },
   labelCompleted: {

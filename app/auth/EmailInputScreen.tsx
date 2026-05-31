@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors, Shadow } from '@/constants/theme';
+import { Colors, Shadow, Fonts } from '@/constants/theme';
 import { Input } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -170,10 +170,10 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   logoGradient: { flex: 1, borderRadius: 60, alignItems: 'center', justifyContent: 'center' },
-  brandTitle: { fontSize: 32, fontWeight: '900', color: '#263238', letterSpacing: -0.5 },
-  brandTagline: { fontSize: 10, color: '#90A4AE', marginTop: 4, letterSpacing: 1.2, fontWeight: '700', textTransform: 'uppercase' },
+  brandTitle: { fontSize: 32, fontFamily: Fonts.bold, color: '#263238', letterSpacing: -0.5 },
+  brandTagline: { fontSize: 10, color: '#90A4AE', marginTop: 4, letterSpacing: 1.2, fontFamily: Fonts.bold, textTransform: 'uppercase' },
   actionSection: { width: '100%', alignItems: 'center' },
-  welcomeText: { fontSize: 24, fontWeight: '800', color: '#263238', marginBottom: 8 },
+  welcomeText: { fontSize: 24, fontFamily: Fonts.bold, color: '#263238', marginBottom: 8 },
   subText: { fontSize: 14, color: '#78909C', textAlign: 'center', marginBottom: 32, paddingHorizontal: 20, lineHeight: 20 },
   inputContainer: { width: '100%', paddingHorizontal: 10 },
   primaryBtn: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  primaryBtnText: { fontSize: 18, fontWeight: '800', color: Colors.white },
+  primaryBtnText: { fontSize: 18, fontFamily: Fonts.bold, color: Colors.white },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   line: { flex: 1, height: 1, backgroundColor: '#ECEFF1' },
-  dividerText: { marginHorizontal: 16, color: '#90A4AE', fontWeight: '700', fontSize: 12 },
+  dividerText: { marginHorizontal: 16, color: '#90A4AE', fontFamily: Fonts.bold, fontSize: 12 },
   googleBtn: {
     width: '100%',
     height: 56,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ECEFF1',
   },
-  googleBtnText: { fontSize: 15, fontWeight: '700', color: '#455A64' },
+  googleBtnText: { fontSize: 15, fontFamily: Fonts.bold, color: '#455A64' },
   footer: { paddingBottom: 20, marginTop: 40 },
   footerText: { fontSize: 10, color: '#CFD8DC', textAlign: 'center' },
 });

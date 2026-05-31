@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
     color: Colors.textSecondary,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
   retryBtn: {
     marginTop: 40,
@@ -149,6 +149,6 @@ const styles = StyleSheet.create({
   retryText: {
     color: Colors.textMuted,
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: Fonts.bold,
   }
 });

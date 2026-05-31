@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, RefreshControl, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Colors, Spacing, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Typography, Layout, Fonts } from '@/constants/theme';
 
 interface AppScreenProps {
   children: ReactNode;
@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, paddingBottom: Layout.screenPaddingBottom },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.bg, padding: Spacing.xl },
   loadingText: { marginTop: Spacing.md, color: Colors.textMuted, fontSize: Typography.sm },
-  errorTitle: { fontSize: Typography.lg, fontWeight: '700', color: Colors.danger, marginBottom: 8 },
+  errorTitle: { fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.danger, marginBottom: 8 },
   errorText: { color: Colors.textSecondary, textAlign: 'center' },
 });

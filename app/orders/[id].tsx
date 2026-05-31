@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { ReceiptPreviewCard } from '@/components/receipt/ReceiptPreviewCard';
 import { ShareReceiptSheet } from '@/components/receipt/ShareReceiptSheet';
-import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Layout, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useShopProfile } from '@/hooks/useShopProfile';
 import { orderRepository } from '@/lib/data/repositories/orderRepository';
@@ -157,7 +157,7 @@ function Line({ label, value, bold, color }: { label: string; value: string; bol
   return (
     <View style={styles.line}>
       <Text style={styles.lineLabel}>{label}</Text>
-      <Text style={[styles.lineValue, bold && { fontWeight: Typography.black }, color ? { color } : null]}>{value}</Text>
+      <Text style={[styles.lineValue, bold && { fontFamily: Fonts.bold }, color ? { color } : null]}>{value}</Text>
     </View>
   );
 }
@@ -181,16 +181,16 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     ...Shadow.sm,
   },
-  client: { fontSize: Typography.lg, fontWeight: Typography.black, color: Colors.textPrimary },
+  client: { fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.textPrimary },
   meta: { fontSize: Typography.sm, color: Colors.textMuted, marginTop: 4 },
-  invoiceId: { fontSize: Typography.xs, color: Colors.amber, fontWeight: Typography.bold, marginTop: 4 },
+  invoiceId: { fontSize: Typography.xs, color: Colors.amber, fontFamily: Fonts.bold, marginTop: 4 },
   badgeRow: { flexDirection: 'row', gap: 8, marginTop: Spacing.md },
   badge: { backgroundColor: Colors.surface2, paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.full },
-  badgeText: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textSecondary, textTransform: 'capitalize' },
+  badgeText: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textSecondary, textTransform: 'capitalize' },
   lastShared: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: Spacing.sm },
   section: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     marginBottom: Spacing.sm,
     color: Colors.textPrimary,
   },
@@ -202,10 +202,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     alignItems: 'center',
   },
-  itemName: { fontWeight: Typography.bold, color: Colors.textPrimary },
+  itemName: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   temp: { color: Colors.info, fontSize: Typography.xs },
   muted: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
-  amt: { fontWeight: Typography.bold, color: Colors.amber },
+  amt: { fontFamily: Fonts.bold, color: Colors.amber },
   summary: {
     backgroundColor: Colors.surface,
     padding: Spacing.lg,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   line: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   lineLabel: { color: Colors.textSecondary, fontSize: Typography.sm },
-  lineValue: { fontWeight: Typography.semibold, color: Colors.textPrimary },
+  lineValue: { fontFamily: Fonts.semibold, color: Colors.textPrimary },
   notes: { marginTop: Spacing.md, color: Colors.textMuted, fontStyle: 'italic', fontSize: Typography.sm },
   footer: {
     padding: Layout.screenPaddingH,
@@ -231,5 +231,5 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     paddingVertical: 14,
   },
-  shareText: { color: Colors.white, fontWeight: Typography.bold, fontSize: Typography.sm },
+  shareText: { color: Colors.white, fontFamily: Fonts.bold, fontSize: Typography.sm },
 });

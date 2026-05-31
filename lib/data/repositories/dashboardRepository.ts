@@ -1,4 +1,5 @@
 import { getDatabase } from '@/lib/core/database';
+import { orderRepository } from '@/lib/data/repositories/orderRepository';
 import type { DashboardStats, Order } from '@/lib/domain/models';
 
 function rowToOrder(row: Record<string, unknown>): Order {
@@ -21,6 +22,7 @@ function rowToOrder(row: Record<string, unknown>): Order {
     delivery_date: (row.delivery_date as string) ?? null,
     delivery_address: (row.delivery_address as string) ?? null,
     notes: (row.notes as string) ?? null,
+    discount_approval_status: (row.discount_approval_status as Order['discount_approval_status']) ?? 'none',
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   };
@@ -31,7 +33,7 @@ export const dashboardRepository = {
     const db = await getDatabase();
     const today = new Date().toISOString().slice(0, 10);
 
-    const [clients, products, categories, orders, todaySales, pending, lowStock, recent] = await Promise.all([
+    const [clients, products, categories, orders, todaySales, pending, lowStock, incompleteProducts, pendingApprovals, recent] = await Promise.all([
       db.getFirstAsync<{ c: number }>(`SELECT COUNT(*) as c FROM clients`),
       db.getFirstAsync<{ c: number }>(`SELECT COUNT(*) as c FROM products`),
       db.getFirstAsync<{ c: number }>(`SELECT COUNT(*) as c FROM categories`),
@@ -44,6 +46,10 @@ export const dashboardRepository = {
       db.getFirstAsync<{ c: number }>(
         `SELECT COUNT(*) as c FROM products WHERE stock_quantity <= min_stock_alert`,
       ),
+      db.getFirstAsync<{ c: number }>(
+        `SELECT COUNT(*) as c FROM products WHERE is_incomplete = 1`,
+      ),
+      orderRepository.countPendingDiscountApproval(),
       db.getAllAsync<Record<string, unknown>>(
         `SELECT * FROM orders WHERE status != 'cancelled' ORDER BY created_at DESC LIMIT 5`,
       ),
@@ -57,6 +63,8 @@ export const dashboardRepository = {
       todaySales: todaySales?.t ?? 0,
       pendingAmount: pending?.t ?? 0,
       lowStockCount: lowStock?.c ?? 0,
+      incompleteProductCount: incompleteProducts?.c ?? 0,
+      pendingDiscountApprovalCount: pendingApprovals ?? 0,
       recentOrders: recent.map(rowToOrder),
     };
   },

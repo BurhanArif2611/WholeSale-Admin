@@ -14,6 +14,7 @@ export function toBaseQuantity(quantity: number, unit: UnitType): number {
     case 'piece':
     case 'box':
     case 'packet':
+    case 'carton':
     case 'meter':
       return quantity;
     default:
@@ -24,7 +25,7 @@ export function toBaseQuantity(quantity: number, unit: UnitType): number {
 export function getBaseUnit(unit: UnitType): UnitType {
   if (unit === 'gram') return 'kg';
   if (unit === 'ml') return 'liter';
-  if (unit === 'box' || unit === 'packet') return 'piece';
+  if (unit === 'box' || unit === 'packet' || unit === 'carton') return 'piece';
   return unit;
 }
 
@@ -101,9 +102,22 @@ export const UNIT_OPTIONS: { label: string; value: UnitType }[] = [
   { label: 'Liter', value: 'liter' },
   { label: 'ML', value: 'ml' },
   { label: 'Piece', value: 'piece' },
-  { label: 'Box', value: 'box' },
   { label: 'Packet', value: 'packet' },
+  { label: 'Box', value: 'box' },
+  { label: 'Carton', value: 'carton' },
   { label: 'Meter', value: 'meter' },
+];
+
+/** Minimal unit set for purchase-order quick add */
+export const QUICK_ADD_UNIT_OPTIONS: { label: string; value: UnitType }[] = [
+  { label: 'KG', value: 'kg' },
+  { label: 'Gram', value: 'gram' },
+  { label: 'Liter', value: 'liter' },
+  { label: 'ML', value: 'ml' },
+  { label: 'Piece', value: 'piece' },
+  { label: 'Packet', value: 'packet' },
+  { label: 'Box', value: 'box' },
+  { label: 'Carton', value: 'carton' },
 ];
 
 /** Units the user may enter quantity in for a product priced in `priceUnit`. */

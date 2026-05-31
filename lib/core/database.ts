@@ -172,6 +172,7 @@ async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
   }
   await migrateCategories(db);
   await migrateOrderDiscounts(db);
+  await migrateProductMetadata(db);
   dbInstance = db;
   return db;
 }
@@ -198,6 +199,26 @@ async function migrateOrderDiscounts(db: SQLite.SQLiteDatabase): Promise<void> {
     if (!orderCols.some((c) => c.name === 'order_discount_amount')) {
       await db.execAsync(`ALTER TABLE orders ADD COLUMN order_discount_amount REAL DEFAULT 0`);
     }
+    if (!orderCols.some((c) => c.name === 'discount_approval_status')) {
+      await db.execAsync(`ALTER TABLE orders ADD COLUMN discount_approval_status TEXT DEFAULT 'none'`);
+    }
+  }
+}
+
+async function migrateProductMetadata(db: SQLite.SQLiteDatabase): Promise<void> {
+  const cols = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(products)`);
+  if (cols.length === 0) return;
+  if (!cols.some((c) => c.name === 'is_incomplete')) {
+    await db.execAsync(`ALTER TABLE products ADD COLUMN is_incomplete INTEGER DEFAULT 0`);
+  }
+  if (!cols.some((c) => c.name === 'brand')) {
+    await db.execAsync(`ALTER TABLE products ADD COLUMN brand TEXT`);
+  }
+  if (!cols.some((c) => c.name === 'allow_discount')) {
+    await db.execAsync(`ALTER TABLE products ADD COLUMN allow_discount INTEGER DEFAULT 0`);
+  }
+  if (!cols.some((c) => c.name === 'max_discount_percent')) {
+    await db.execAsync(`ALTER TABLE products ADD COLUMN max_discount_percent REAL DEFAULT 0`);
   }
 }
 
@@ -335,6 +356,38 @@ export async function repairDatabase(): Promise<void> {
   const db = dbInstance ?? (await getDatabase());
   await migrateCategories(db);
   await migrateOrderDiscounts(db);
+  await migrateProductMetadata(db);
+}
+
+/** Remove all business data — categories are re-seeded. Used on logout / account switch. */
+export async function wipeAllUserData(): Promise<void> {
+  const db = dbInstance ?? (await getDatabase());
+  await db.execAsync(`
+    PRAGMA foreign_keys = OFF;
+    DELETE FROM order_items;
+    DELETE FROM orders;
+    DELETE FROM ledger_entries;
+    DELETE FROM inventory_transactions;
+    DELETE FROM sync_queue;
+    DELETE FROM products;
+    DELETE FROM clients;
+    DELETE FROM categories;
+    PRAGMA foreign_keys = ON;
+  `);
+  await migrateCategories(db);
+  await migrateOrderDiscounts(db);
+}
+
+export async function closeDatabase(): Promise<void> {
+  if (!dbInstance) return;
+  try {
+    await dbInstance.closeAsync();
+  } catch (e) {
+    console.warn('[DB] closeAsync failed:', e);
+  } finally {
+    dbInstance = null;
+    initPromise = null;
+  }
 }
 
 export async function runInTransaction<T>(fn: (db: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {

@@ -33,7 +33,11 @@ function rowToProduct(row: Record<string, unknown>): Product {
     image_uri: (row.image_uri as string) ?? null,
     tax_percent: Number(row.tax_percent ?? 0),
     discount_percent: Number(row.discount_percent ?? 0),
+    allow_discount: Number(row.allow_discount ?? 0) === 1,
+    max_discount_percent: Number(row.max_discount_percent ?? 0),
     notes: (row.notes as string) ?? null,
+    brand: (row.brand as string) ?? null,
+    is_incomplete: Number(row.is_incomplete ?? 0) === 1,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   };
@@ -147,6 +151,67 @@ export const productRepository = {
     return row ? rowToProduct(row) : null;
   },
 
+  async findIncomplete(): Promise<Product[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<Record<string, unknown>>(
+      `SELECT * FROM products WHERE is_incomplete = 1 ORDER BY updated_at DESC`,
+    );
+    return rows.map(rowToProduct);
+  },
+
+  async countIncomplete(): Promise<number> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{ c: number }>(
+      `SELECT COUNT(*) as c FROM products WHERE is_incomplete = 1`,
+    );
+    return row?.c ?? 0;
+  },
+
+  /** Fast minimal create during purchase order — flagged incomplete for later completion. */
+  async createQuickIncomplete(input: {
+    name: string;
+    unit_type: UnitType;
+    purchase_price: number;
+    selling_price: number;
+    brand?: string | null;
+    barcode?: string | null;
+  }): Promise<Product> {
+    const fallback = await categoryRepository.getFallback();
+    const purchase = input.purchase_price ?? 0;
+    const selling = input.selling_price ?? 0;
+    return this.create({
+      name: input.name.trim(),
+      category_id: fallback.id,
+      sku: null,
+      barcode: input.barcode?.trim() || null,
+      brand: input.brand?.trim() || null,
+      purchase_price: purchase,
+      selling_price: selling,
+      unit_type: input.unit_type,
+      stock_quantity: 0,
+      min_stock_alert: 0,
+      expiry_date: null,
+      image_uri: null,
+      tax_percent: 0,
+      discount_percent: 0,
+      allow_discount: false,
+      max_discount_percent: 0,
+      notes: null,
+      is_incomplete: true,
+    });
+  },
+
+  async markComplete(id: string): Promise<Product> {
+    const db = await getDatabase();
+    await db.runAsync(
+      `UPDATE products SET is_incomplete = 0, updated_at = ? WHERE id = ?`,
+      [new Date().toISOString(), id],
+    );
+    const updated = await this.findById(id);
+    if (!updated) throw new Error('Product not found');
+    return updated;
+  },
+
   async getCategories(): Promise<string[]> {
     const cats = await categoryRepository.findAll();
     return cats.map((c) => c.name);
@@ -163,8 +228,8 @@ export const productRepository = {
     const id = generateId();
 
     await db.runAsync(
-      `INSERT INTO products (id, name, category_id, category, sku, barcode, purchase_price, selling_price, unit_type, stock_quantity, min_stock_alert, expiry_date, image_uri, tax_percent, discount_percent, notes, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (id, name, category_id, category, sku, barcode, brand, purchase_price, selling_price, unit_type, stock_quantity, min_stock_alert, expiry_date, image_uri, tax_percent, discount_percent, allow_discount, max_discount_percent, notes, is_incomplete, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         input.name.trim(),
@@ -172,6 +237,7 @@ export const productRepository = {
         cat.name,
         input.sku?.trim() || null,
         input.barcode?.trim() || null,
+        input.brand?.trim() || null,
         input.purchase_price ?? 0,
         input.selling_price ?? 0,
         input.unit_type,
@@ -181,7 +247,10 @@ export const productRepository = {
         input.image_uri ?? null,
         input.tax_percent ?? 0,
         input.discount_percent ?? 0,
+        input.allow_discount ? 1 : 0,
+        input.max_discount_percent ?? 0,
         input.notes?.trim() || null,
+        input.is_incomplete ? 1 : 0,
         now,
         now,
       ],
@@ -211,9 +280,11 @@ export const productRepository = {
 
     await db.runAsync(
       `UPDATE products SET
-        name = ?, category_id = ?, category = ?, sku = ?, barcode = ?, purchase_price = ?, selling_price = ?,
+        name = ?, category_id = ?, category = ?, sku = ?, barcode = ?, brand = ?,
+        purchase_price = ?, selling_price = ?,
         unit_type = ?, stock_quantity = ?, min_stock_alert = ?, expiry_date = ?, image_uri = ?,
-        tax_percent = ?, discount_percent = ?, notes = ?, updated_at = ?
+        tax_percent = ?, discount_percent = ?, allow_discount = ?, max_discount_percent = ?, notes = ?,
+        is_incomplete = ?, updated_at = ?
        WHERE id = ?`,
       [
         (input.name ?? existing.name).trim(),
@@ -221,6 +292,7 @@ export const productRepository = {
         categoryName,
         input.sku !== undefined ? input.sku?.trim() || null : existing.sku,
         input.barcode !== undefined ? input.barcode?.trim() || null : existing.barcode,
+        input.brand !== undefined ? input.brand?.trim() || null : existing.brand,
         input.purchase_price ?? existing.purchase_price,
         input.selling_price ?? existing.selling_price,
         input.unit_type ?? existing.unit_type,
@@ -230,7 +302,10 @@ export const productRepository = {
         input.image_uri !== undefined ? input.image_uri : existing.image_uri,
         input.tax_percent ?? existing.tax_percent,
         input.discount_percent ?? existing.discount_percent,
+        (input.allow_discount ?? existing.allow_discount) ? 1 : 0,
+        input.max_discount_percent ?? existing.max_discount_percent,
         input.notes !== undefined ? input.notes?.trim() || null : existing.notes,
+        input.is_incomplete !== undefined ? (input.is_incomplete ? 1 : 0) : (existing.is_incomplete ? 1 : 0),
         now,
         id,
       ],

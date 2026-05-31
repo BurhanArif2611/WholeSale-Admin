@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LANGUAGES, Locale } from '@/constants/translations';
 
@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: { flex: 1, fontSize: Typography.base, fontWeight: '700', color: Colors.textPrimary },
+  label: { flex: 1, fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.textPrimary },
   labelActive: { color: Colors.amberDim },
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Radius, Typography } from '@/constants/theme';
+import { Colors, Radius, Typography, Fonts } from '@/constants/theme';
 
 interface CategoryBadgeProps {
   name: string;
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   badgeCompact: { paddingHorizontal: 6, paddingVertical: 2 },
   text: {
     fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.purple,
   },
   textCompact: { fontSize: 10 },

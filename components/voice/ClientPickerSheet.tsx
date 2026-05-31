@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Shadow } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Fonts } from '@/constants/theme';
 import { SearchBar } from '../ui';
 import type { Store } from '@/types';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight
   },
-  title: { fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.textPrimary },
+  title: { fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.textPrimary },
   closeBtn: { padding: 4 },
   searchContainer: { padding: Spacing.md },
   loader: { marginVertical: Spacing.xxxl },
@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     justifyContent: 'center' 
   },
-  avatarText: { color: Colors.amber, fontWeight: Typography.bold },
+  avatarText: { color: Colors.amber, fontFamily: Fonts.bold },
   itemInfo: { flex: 1 },
-  itemName: { fontSize: Typography.base, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  itemName: { fontSize: Typography.base, fontFamily: Fonts.semibold, color: Colors.textPrimary },
   itemArea: { fontSize: Typography.xs, color: Colors.textSecondary, marginTop: 2 },
 });

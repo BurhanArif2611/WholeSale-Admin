@@ -8,7 +8,7 @@ import {
   StyleProp,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
+import { Colors, Radius, Shadow, Spacing, Typography, Fonts } from '@/constants/theme';
 
 interface ListCardProps {
   title: string;
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   body: { flex: 1, minWidth: 0 },
   title: {
     fontSize: Typography.sm,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     letterSpacing: -0.2,
   },
@@ -126,20 +126,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textSecondary,
     marginTop: 4,
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
   right: { alignItems: 'flex-end', maxWidth: '36%' },
   rightText: {
     fontSize: Typography.sm,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'right',
   },
   rightSub: {
     fontSize: 10,
-    fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     marginTop: 3,
     textTransform: 'uppercase',

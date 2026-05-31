@@ -14,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Colors, Shadow } from "@/constants/theme";
+import { Colors, Shadow, Fonts } from '@/constants/theme';
 import { Input } from "@/components/ui";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   brandTitle: {
     fontSize: 32,
-    fontWeight: "900",
+    fontFamily: Fonts.bold,
     color: "#263238",
     letterSpacing: -0.5,
   },
@@ -214,13 +214,13 @@ const styles = StyleSheet.create({
     color: "#90A4AE",
     marginTop: 4,
     letterSpacing: 1.2,
-    fontWeight: "700",
+    fontFamily: Fonts.bold,
     textTransform: "uppercase",
   },
   actionSection: { width: "100%", alignItems: "center" },
   welcomeText: {
     fontSize: 24,
-    fontWeight: "800",
+    fontFamily: Fonts.bold,
     color: "#263238",
     marginBottom: 8,
   },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  primaryBtnText: { fontSize: 18, fontWeight: "800", color: Colors.white },
+  primaryBtnText: { fontSize: 18, fontFamily: Fonts.bold, color: Colors.white },
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   dividerText: {
     marginHorizontal: 16,
     color: "#90A4AE",
-    fontWeight: "700",
+    fontFamily: Fonts.bold,
     fontSize: 12,
   },
   googleBtn: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ECEFF1",
   },
-  googleBtnText: { fontSize: 15, fontWeight: "700", color: "#455A64" },
+  googleBtnText: { fontSize: 15, fontFamily: Fonts.bold, color: "#455A64" },
   footer: { paddingBottom: 20, marginTop: 40 },
   footerText: { fontSize: 10, color: "#CFD8DC", textAlign: "center" },
 });

@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Gradients, Shadow } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Gradients, Shadow, Fonts } from '@/constants/theme';
 import { parseOrderCommand, parseClientCommand, parseProductCommand } from '@/lib/voice';
 import { fetchStores, fetchMaterials, createOrder, createStore, createMaterial, resolvePrice } from '@/lib/api';
 import type { Store, Material } from '@/types';
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.md },
   headerIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { flex: 1, fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.textPrimary },
+  headerTitle: { flex: 1, fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.textPrimary },
   closeBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.surface2, alignItems: 'center', justifyContent: 'center' },
   listenScreen: { alignItems: 'center', overflow: 'visible' },
   hintBox: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: Colors.surface2, borderRadius: Radius.lg, padding: Spacing.lg, borderWidth: 1, marginBottom: Spacing.xl, width: '100%' },
@@ -490,27 +490,27 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', paddingVertical: Spacing.xl },
   processingIconBox: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center' },
   glowRing: { position: 'absolute', width: 60, height: 60, borderRadius: 30, borderWidth: 2, opacity: 0.2 },
-  processingText: { fontSize: Typography.lg, fontWeight: Typography.bold, marginTop: Spacing.md, marginBottom: Spacing.md },
+  processingText: { fontSize: Typography.lg, fontFamily: Fonts.bold, marginTop: Spacing.md, marginBottom: Spacing.md },
   transcriptBox: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm, backgroundColor: Colors.surface2, borderRadius: Radius.md, padding: Spacing.md, marginVertical: Spacing.md, borderWidth: 1, borderColor: Colors.border, width: '100%' },
   transcriptText: { flex: 1, fontSize: Typography.xs, color: Colors.textSecondary, fontStyle: 'italic', lineHeight: 18 },
   editSection: { backgroundColor: Colors.surface2, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.border },
-  editLabel: { fontSize: 10, color: Colors.textMuted, marginBottom: Spacing.sm, fontWeight: Typography.bold, textTransform: 'uppercase' },
+  editLabel: { fontSize: 10, color: Colors.textMuted, marginBottom: Spacing.sm, fontFamily: Fonts.bold, textTransform: 'uppercase' },
   editInputBox: { flexDirection: 'row', gap: Spacing.sm, alignItems: 'center' },
   editInput: { flex: 1, color: Colors.textPrimary, fontSize: Typography.sm, backgroundColor: Colors.surface, borderRadius: Radius.sm, padding: Spacing.md, minHeight: 60 },
   saveBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   tapToEdit: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4, marginBottom: Spacing.sm, alignSelf: 'center' },
   tapToEditText: { fontSize: 10, color: Colors.textMuted, fontStyle: 'italic' },
-  nfTitle: { fontSize: Typography.lg, fontWeight: Typography.black, color: Colors.textPrimary, marginBottom: Spacing.sm },
+  nfTitle: { fontSize: Typography.lg, fontFamily: Fonts.bold, color: Colors.textPrimary, marginBottom: Spacing.sm },
   nfSub: { fontSize: Typography.sm, color: Colors.textMuted, textAlign: 'center', paddingHorizontal: Spacing.xl },
   nfItem: { backgroundColor: Colors.dangerBg, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.sm, width: '100%', borderWidth: 1, borderColor: Colors.danger + '33' },
-  nfText: { fontSize: Typography.sm, color: Colors.danger, fontWeight: Typography.semibold },
-  successText: { fontSize: Typography.xxl, fontWeight: Typography.black, color: Colors.textPrimary, marginTop: Spacing.lg },
+  nfText: { fontSize: Typography.sm, color: Colors.danger, fontFamily: Fonts.semibold },
+  successText: { fontSize: Typography.xxl, fontFamily: Fonts.bold, color: Colors.textPrimary, marginTop: Spacing.lg },
   successRing: { width: 100, height: 100, borderRadius: 50, borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
   btnRow: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.md },
   retryBtn: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.lg, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border },
-  retryText: { fontSize: Typography.sm, color: Colors.textSecondary, fontWeight: Typography.semibold },
+  retryText: { fontSize: Typography.sm, color: Colors.textSecondary, fontFamily: Fonts.semibold },
   confirmBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm, borderRadius: Radius.md, paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl },
-  confirmText: { fontSize: Typography.base, fontWeight: Typography.bold },
+  confirmText: { fontSize: Typography.base, fontFamily: Fonts.bold },
 
   lockedStoreBar: {
     flexDirection: 'row',
@@ -524,8 +524,8 @@ const styles = StyleSheet.create({
   },
   lockedStoreInfo: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 },
   lockedStoreIconWrap: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  lockedStoreLabel: { fontSize: 8, fontWeight: '800', color: Colors.textMuted, letterSpacing: 0.5, marginBottom: 1 },
-  lockedStoreName: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary },
+  lockedStoreLabel: { fontSize: 8, fontFamily: Fonts.bold, color: Colors.textMuted, letterSpacing: 0.5, marginBottom: 1 },
+  lockedStoreName: { fontSize: Typography.base, fontFamily: Fonts.bold, color: Colors.textPrimary },
   changeBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
@@ -539,5 +539,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4
   },
-  changeBtnText: { fontSize: 11, fontWeight: Typography.bold },
+  changeBtnText: { fontSize: 11, fontFamily: Fonts.bold },
 });

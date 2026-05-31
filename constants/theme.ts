@@ -1,5 +1,8 @@
 // constants/theme.ts
-import { Dimensions } from 'react-native';
+import { Dimensions, ViewStyle } from 'react-native';
+import { Fonts, poppinsText } from './fonts';
+
+export { Fonts, fontForWeight, poppinsText, withPoppins } from './fonts';
 
 export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -64,27 +67,43 @@ export const Gradients = {
 
 
 export const Typography = {
-  xs: 15,
-  sm: 17,
-  base: 18,
-  md: 21,
-  lg: 25,
-  xl: 30,
-  xxl: 38,
-  xxxl: 46,
+  xs: 13,
+  sm: 15,
+  base: 16,
+  md: 18,
+  lg: 22,
+  xl: 26,
+  xxl: 32,
+  xxxl: 40,
 
+  /** @deprecated Use Fonts.regular with fontFamily instead of fontWeight */
   regular: '400' as const,
+  /** @deprecated Use Fonts.medium with fontFamily instead of fontWeight */
   medium: '500' as const,
+  /** @deprecated Use Fonts.semibold with fontFamily instead of fontWeight */
   semibold: '600' as const,
+  /** @deprecated Use Fonts.bold with fontFamily instead of fontWeight */
   bold: '700' as const,
+  /** @deprecated Maps to Fonts.bold — Poppins max weight is 700 */
   extrabold: '800' as const,
+  /** @deprecated Maps to Fonts.bold — Poppins max weight is 700 */
   black: '900' as const,
 
-  tight: -0.5,
+  tight: -0.3,
   normal: 0,
-  wide: 0.5,
-  wider: 1,
-  widest: 2,
+  wide: 0.4,
+  wider: 0.8,
+  widest: 1.2,
+
+  /** Standard line heights tuned for Poppins metrics */
+  lineHeight: {
+    xs: 18,
+    sm: 22,
+    base: 24,
+    md: 26,
+    lg: 28,
+    xl: 34,
+  },
 };
 
 export const Spacing = {
@@ -117,6 +136,159 @@ export const Radius = {
   xl: 20,
   xxl: 28,
   full: 999,
+};
+
+/** Central typography presets — single source for all UI surfaces */
+export const TextTheme = {
+  appBarTitle: poppinsText(Typography.base, 'bold', Colors.textPrimary, {
+    letterSpacing: Typography.tight,
+  }),
+  screenTitle: poppinsText(Typography.lg, 'bold', Colors.textPrimary, {
+    letterSpacing: Typography.tight,
+    lineHeight: Typography.lineHeight.lg,
+  }),
+  sectionHeader: poppinsText(11, 'bold', Colors.textMuted, {
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    lineHeight: 16,
+  }),
+  cardTitle: poppinsText(Typography.sm, 'semibold', Colors.textPrimary, {
+    lineHeight: Typography.lineHeight.sm,
+  }),
+  body: poppinsText(Typography.sm, 'regular', Colors.textSecondary, {
+    lineHeight: Typography.lineHeight.sm,
+  }),
+  bodyPrimary: poppinsText(Typography.sm, 'regular', Colors.textPrimary, {
+    lineHeight: Typography.lineHeight.sm,
+  }),
+  label: poppinsText(Typography.xs, 'semibold', Colors.textSecondary, {
+    lineHeight: Typography.lineHeight.xs,
+  }),
+  caption: poppinsText(Typography.xs, 'regular', Colors.textMuted, {
+    lineHeight: Typography.lineHeight.xs,
+  }),
+  button: poppinsText(Typography.sm, 'bold', Colors.white, {
+    lineHeight: Typography.lineHeight.sm,
+    textAlign: 'center',
+  }),
+  chip: poppinsText(Typography.xs, 'semibold', Colors.textPrimary, {
+    lineHeight: Typography.lineHeight.xs,
+  }),
+  error: poppinsText(Typography.xs, 'medium', Colors.danger, {
+    lineHeight: Typography.lineHeight.xs,
+  }),
+  emptyState: poppinsText(Typography.sm, 'regular', Colors.textSecondary, {
+    textAlign: 'center',
+    lineHeight: Typography.lineHeight.sm,
+    letterSpacing: 0.3,
+  }),
+  tabLabel: poppinsText(10, 'semibold', undefined, {
+    letterSpacing: 0.4,
+    marginTop: 2,
+  }),
+  input: poppinsText(Typography.sm, 'regular', Colors.textPrimary, {
+    lineHeight: Typography.lineHeight.sm,
+  }),
+  dialogTitle: poppinsText(Typography.md, 'bold', Colors.textPrimary, {
+    textAlign: 'center',
+    letterSpacing: Typography.tight,
+    lineHeight: Typography.lineHeight.md,
+  }),
+  dialogBody: poppinsText(Typography.sm, 'regular', Colors.textSecondary, {
+    textAlign: 'center',
+    lineHeight: Typography.lineHeight.sm,
+  }),
+  bottomSheetTitle: poppinsText(Typography.base, 'bold', Colors.textPrimary, {
+    letterSpacing: Typography.tight,
+    flex: 1,
+  }),
+};
+
+export const AppBarTheme = {
+  titleStyle: TextTheme.appBarTitle,
+  headerStyle: { backgroundColor: Colors.bg } as ViewStyle,
+  tintColor: Colors.textPrimary,
+  headerTitleAlign: 'center' as const,
+  headerShadowVisible: false,
+};
+
+export const InputDecorationTheme = {
+  fontFamily: Fonts.regular,
+  fontSize: Typography.sm,
+  color: Colors.textPrimary,
+  placeholderColor: Colors.textMuted,
+  minHeight: 48,
+  borderRadius: Radius.lg,
+  borderColor: Colors.border,
+  borderColorFocused: Colors.amber,
+  borderColorError: Colors.danger,
+  labelStyle: TextTheme.label,
+  hintStyle: TextTheme.caption,
+  errorStyle: TextTheme.error,
+};
+
+export const TabBarTheme = {
+  style: {
+    backgroundColor: Colors.surface,
+    borderTopColor: Colors.border,
+    borderTopWidth: 1,
+    height: 68,
+    paddingBottom: 10,
+    paddingTop: 6,
+    elevation: 0,
+  } as ViewStyle,
+  activeTintColor: Colors.amber,
+  inactiveTintColor: Colors.textMuted,
+  labelStyle: TextTheme.tabLabel,
+};
+
+export const BottomSheetTheme = {
+  titleStyle: TextTheme.bottomSheetTitle,
+  handleStyle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+  } as ViewStyle,
+};
+
+export const DialogTheme = {
+  titleStyle: TextTheme.dialogTitle,
+  messageStyle: TextTheme.dialogBody,
+  actionTextStyle: poppinsText(Typography.sm, 'bold'),
+};
+
+export const ElevatedButtonTheme = {
+  textStyle: TextTheme.button,
+  minHeight: 48,
+  borderRadius: Radius.lg,
+};
+
+export const OutlinedButtonTheme = {
+  textStyle: poppinsText(Typography.sm, 'bold', Colors.textPrimary),
+  minHeight: 48,
+  borderRadius: Radius.lg,
+  borderWidth: 1.5,
+  borderColor: Colors.border,
+};
+
+export const TextButtonTheme = {
+  textStyle: poppinsText(Typography.sm, 'semibold', Colors.textSecondary),
+  minHeight: 44,
+};
+
+/** Combined app theme — import surfaces from here */
+export const AppTheme = {
+  fonts: Fonts,
+  text: TextTheme,
+  appBar: AppBarTheme,
+  input: InputDecorationTheme,
+  tabBar: TabBarTheme,
+  bottomSheet: BottomSheetTheme,
+  dialog: DialogTheme,
+  elevatedButton: ElevatedButtonTheme,
+  outlinedButton: OutlinedButtonTheme,
+  textButton: TextButtonTheme,
 };
 
 export const Shadow = {

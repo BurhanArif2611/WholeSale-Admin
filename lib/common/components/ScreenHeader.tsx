@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-nativ
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, Spacing, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Typography, Layout, TextTheme } from '@/constants/theme';
 
 interface ScreenHeaderProps {
   title: string;
@@ -89,12 +89,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
+    ...TextTheme.appBarTitle,
     flex: 1,
     textAlign: 'center',
-    fontSize: Typography.base,
-    fontWeight: Typography.bold,
-    color: Colors.textPrimary,
-    letterSpacing: Typography.tight,
     paddingHorizontal: Spacing.xs,
   },
   titleCompact: {

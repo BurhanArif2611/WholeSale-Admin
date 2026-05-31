@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors, Spacing, Typography, Fonts } from '@/constants/theme';
 
 interface SettingsRowProps {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -97,13 +97,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   body: { flex: 1 },
-  label: { fontSize: Typography.sm, fontWeight: '700', color: Colors.textPrimary },
+  label: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   destructive: { color: Colors.danger },
   subtitle: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2, lineHeight: 16 },
   value: {
     fontSize: Typography.xs,
     color: Colors.textSecondary,
-    fontWeight: '600',
+    fontFamily: Fonts.semibold,
     maxWidth: 100,
     textAlign: 'right',
   },

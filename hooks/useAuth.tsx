@@ -8,17 +8,15 @@ import { updateProfile } from '@/lib/api/profiles';
 import { Profile, UserRole } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { clearCache } from './useDataStore';
+import { performFullSessionReset } from '@/lib/auth/sessionReset';
 import {
   type UserProfileData,
   saveUserProfile,
   isProfileSetupComplete,
   markProfileSetupComplete,
-  clearUserProfileStorage,
 } from '@/lib/auth/userProfile';
 import {
   isCategorySetupComplete,
-  clearBusinessCategoryStorage,
   saveBusinessCategories,
   saveShowAllCategories,
 } from '@/lib/preferences/businessCategories';
@@ -95,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isUpdatingRef = React.useRef(false);
   const syncInProgressRef = React.useRef<string | null>(null);
   const lastSessionUserIdRef = React.useRef<string | null>(null);
+  const isSigningOutRef = React.useRef(false);
 
   const setProfile = useCallback((p: Profile | null) => {
     setProfileState(p);
@@ -217,15 +216,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newUser);
 
         if (event === 'SIGNED_IN' && newUser) {
-          lastSessionUserIdRef.current = newUser.id;
-          void syncProfile(newUser.id, 3, 1000, profile?.id === newUser.id);
+          const previousUserId = lastSessionUserIdRef.current;
+          if (previousUserId && previousUserId !== newUser.id) {
+            void performFullSessionReset().then(() => {
+              lastSessionUserIdRef.current = newUser.id;
+              void syncProfile(newUser.id, 3, 1000, false);
+            });
+          } else {
+            lastSessionUserIdRef.current = newUser.id;
+            void syncProfile(newUser.id, 3, 1000, profile?.id === newUser.id);
+          }
         } else if (event === 'SIGNED_OUT') {
           lastSessionUserIdRef.current = null;
+          if (!isSigningOutRef.current) {
+            void performFullSessionReset().catch((e) =>
+              console.warn('[useAuth] Session reset on SIGNED_OUT failed:', e),
+            );
+          }
           setProfileState(null);
           setHasConfirmedRole(false);
-      setHasCompletedProfileSetup(false);
-      setHasCompletedCategorySetup(false);
-      void clearDevSession();
+          setHasCompletedProfileSetup(false);
+          setHasCompletedCategorySetup(false);
+          void clearDevSession();
           AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
         } else if (event === 'USER_UPDATED' && newUser) {
           void syncProfile(newUser.id);
@@ -480,10 +492,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const devBypassLogin = React.useCallback(async (email: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (user?.email && user.email.toLowerCase() !== normalizedEmail) {
+      await performFullSessionReset();
+    }
+
     const devUserId = '00000000-0000-0000-0000-000000000001';
     const mockUser = {
       id: devUserId,
-      email,
+      email: normalizedEmail,
       app_metadata: {},
       user_metadata: {},
       aud: 'authenticated',
@@ -503,7 +520,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: devUserId,
       role: 'owner',
       owner_id: devUserId,
-      full_name: email.split('@')[0] || 'Dev User',
+      full_name: normalizedEmail.split('@')[0] || 'Dev User',
       phone: null,
       created_at: new Date().toISOString(),
     };
@@ -523,7 +540,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setHasCompletedCategorySetup(catDone);
     setLoading(false);
     console.log('[useAuth] devBypassLogin: session persisted');
-  }, [setProfile]);
+  }, [setProfile, user?.email]);
 
   const sendEmailOTP = React.useCallback(async (email: string) => {
     console.log('[useAuth] sendEmailOTP initiated for:', email);
@@ -559,41 +576,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = React.useCallback(async () => {
-    const currentUserId = user?.id;
-    console.log('[useAuth] Initiating robust sign out for:', currentUserId);
-    
-    // 1. CLEAR EVERYTHING LOCALLY FIRST (INSTANT FEEDBACK)
-    console.log('[useAuth] Clearing internal state and cache...');
-    if (currentUserId) {
-      void clearUserProfileStorage(currentUserId);
-      void clearBusinessCategoryStorage(currentUserId);
-    }
-    void clearDevSession();
-    AsyncStorage.removeItem(PROFILE_CACHE_KEY).catch(() => {});
-    clearCache();
-    setProfile(null);
-    setUser(null);
-    setSession(null);
-    setHasConfirmedRole(false);
-    setHasCompletedProfileSetup(false);
-    setHasCompletedCategorySetup(false);
-    setLoading(false); // Clear loading to let AuthGuard work immediately
-    
-    // 2. REDIRECT IMMEDIATELY
-    console.log('[useAuth] Sign out initiated. Forcing instant redirect.');
-    router.replace('/login' as any);
+    if (isSigningOutRef.current) return;
+    isSigningOutRef.current = true;
 
-    if (!isDevBypassSession(session)) {
-      try {
-        console.log('[useAuth] Finalizing cloud sign out in background...');
-        void supabase.auth.signOut().then(() => {
-          console.log('[useAuth] Cloud sign out final.');
-        });
-      } catch (e) {
-        console.warn('[useAuth] Background sign out error:', e);
+    const activeSession = session;
+    console.log('[useAuth] Initiating full sign out for:', user?.id);
+
+    try {
+      if (!isDevBypassSession(activeSession)) {
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch (e) {
+          console.warn('[useAuth] Supabase signOut failed (continuing local reset):', e);
+        }
+      } else {
+        await clearDevSession();
       }
+
+      await performFullSessionReset();
+
+      lastSessionUserIdRef.current = null;
+      syncInProgressRef.current = null;
+      setProfile(null);
+      setUser(null);
+      setSession(null);
+      setHasConfirmedRole(false);
+      setHasCompletedProfileSetup(false);
+      setHasCompletedCategorySetup(false);
+      setLoading(false);
+
+      router.replace('/login' as any);
+    } catch (e) {
+      console.error('[useAuth] Sign out failed:', e);
+      setProfile(null);
+      setUser(null);
+      setSession(null);
+      setHasConfirmedRole(false);
+      setHasCompletedProfileSetup(false);
+      setHasCompletedCategorySetup(false);
+      router.replace('/login' as any);
+    } finally {
+      isSigningOutRef.current = false;
     }
-  }, [user, router]);
+  }, [user?.id, session, router, setProfile]);
 
   const updateRole = React.useCallback(async (role: UserRole, ownerId?: string) => {
     try {

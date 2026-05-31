@@ -8,7 +8,7 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { SettingsSection, SettingsRow } from '@/lib/common/components/settings';
-import { Colors, Spacing, Radius, Shadow, Gradients, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useAuth } from '@/hooks/useAuth';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -210,8 +210,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   profileText: { flex: 1 },
-  profileEmail: { color: Colors.white, fontSize: Typography.md, fontWeight: '800' },
-  profileRole: { color: 'rgba(255,255,255,0.85)', fontSize: Typography.xs, marginTop: 4, fontWeight: '600' },
+  profileEmail: { color: Colors.white, fontSize: Typography.md, fontFamily: Fonts.bold },
+  profileRole: { color: 'rgba(255,255,255,0.85)', fontSize: Typography.xs, marginTop: 4, fontFamily: Fonts.semibold },
   footer: {
     textAlign: 'center',
     fontSize: Typography.xs,

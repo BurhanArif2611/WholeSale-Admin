@@ -15,7 +15,7 @@ import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { SearchBar } from '@/components/ui';
 import { CategoryChips } from '@/lib/common/components/CategoryChips';
 import { FormField } from '@/lib/common/components/FormField';
-import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
 import { useBusinessCategories } from '@/hooks/useBusinessCategories';
@@ -338,7 +338,7 @@ function SummaryCard({ label, value, color }: { label: string; value: string; co
 const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   chipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  chipText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
+  chipText: { fontSize: 12, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   chipTextActive: { color: Colors.white },
   dateRow: { flexDirection: 'row', gap: Spacing.sm },
   pickerBtn: {
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  pickerText: { fontSize: Typography.sm, fontWeight: '600', color: Colors.textPrimary, flex: 1 },
+  pickerText: { fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary, flex: 1 },
   pickerPanel: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     ...Shadow.sm,
   },
-  applyText: { color: Colors.white, fontWeight: '800', fontSize: Typography.sm },
+  applyText: { color: Colors.white, fontFamily: Fonts.bold, fontSize: Typography.sm },
   summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   summaryCard: {
     width: '47%',
@@ -400,11 +400,11 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     ...Shadow.sm,
   },
-  summaryLabel: { fontSize: 10, color: Colors.textMuted, fontWeight: '700' },
-  summaryValue: { fontSize: Typography.md, fontWeight: '900', color: Colors.textPrimary, marginTop: 4 },
+  summaryLabel: { fontSize: 10, color: Colors.textMuted, fontFamily: Fonts.bold },
+  summaryValue: { fontSize: Typography.md, fontFamily: Fonts.bold, color: Colors.textPrimary, marginTop: 4 },
   listHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Spacing.lg },
   exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
-  exportText: { fontSize: 12, fontWeight: '700', color: Colors.amber },
+  exportText: { fontSize: 12, fontFamily: Fonts.bold, color: Colors.amber },
   empty: { textAlign: 'center', color: Colors.textMuted, padding: Spacing.xl },
   orderRow: {
     flexDirection: 'row',
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     ...Shadow.sm,
   },
-  orderClient: { fontWeight: '700', color: Colors.textPrimary },
+  orderClient: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   orderMeta: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
-  orderTotal: { fontWeight: '800', color: Colors.textPrimary },
+  orderTotal: { fontFamily: Fonts.bold, color: Colors.textPrimary },
 });

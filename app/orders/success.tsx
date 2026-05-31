@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { ReceiptPreviewCard } from '@/components/receipt/ReceiptPreviewCard';
 import { ShareReceiptSheet } from '@/components/receipt/ShareReceiptSheet';
-import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useShopProfile } from '@/hooks/useShopProfile';
 import { orderRepository } from '@/lib/data/repositories/orderRepository';
@@ -184,8 +184,8 @@ const chipStyles = StyleSheet.create({
     ...Shadow.sm,
   },
   chipHighlight: { borderColor: Colors.amber + '66', backgroundColor: Colors.amberBg },
-  label: { fontSize: 10, color: Colors.textMuted, marginTop: 4, fontWeight: Typography.semibold },
-  value: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textPrimary, marginTop: 2, textAlign: 'center' },
+  label: { fontSize: 10, color: Colors.textMuted, marginTop: 4, fontFamily: Fonts.semibold },
+  value: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textPrimary, marginTop: 2, textAlign: 'center' },
 });
 
 const styles = StyleSheet.create({
@@ -201,16 +201,16 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: Typography.md,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
-  invoiceNo: { fontSize: Typography.sm, color: Colors.textMuted, marginTop: 4, fontWeight: Typography.semibold },
+  invoiceNo: { fontSize: Typography.sm, color: Colors.textMuted, marginTop: 4, fontFamily: Fonts.semibold },
   statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   lastShared: { fontSize: Typography.xs, color: Colors.textMuted, textAlign: 'center', marginBottom: Spacing.sm },
   previewLabel: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     padding: Spacing.md,
   },
-  previewBtnText: { fontSize: Typography.sm, color: Colors.amber, fontWeight: Typography.semibold },
+  previewBtnText: { fontSize: Typography.sm, color: Colors.amber, fontFamily: Fonts.semibold },
   footer: {
     padding: Spacing.lg,
     backgroundColor: Colors.surface,
@@ -238,8 +238,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     paddingVertical: 16,
   },
-  sharePrimaryText: { color: Colors.white, fontSize: Typography.md, fontWeight: Typography.black },
+  sharePrimaryText: { color: Colors.white, fontSize: Typography.md, fontFamily: Fonts.bold },
   footerRow: { flexDirection: 'row', justifyContent: 'space-around' },
   footerBtn: { alignItems: 'center', padding: Spacing.sm },
-  footerBtnText: { fontSize: 11, color: Colors.textMuted, marginTop: 4, fontWeight: Typography.semibold },
+  footerBtnText: { fontSize: 11, color: Colors.textMuted, marginTop: 4, fontFamily: Fonts.semibold },
 });

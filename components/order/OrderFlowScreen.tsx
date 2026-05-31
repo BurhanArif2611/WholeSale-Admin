@@ -17,7 +17,7 @@ import { QuickAddProductSheet } from '@/lib/common/components/order/QuickAddProd
 import { QuickAddTempProductSheet } from '@/lib/common/components/order/QuickAddTempProductSheet';
 import { ConfirmOrderStep, ConfirmOrderFooter } from '@/components/order/ConfirmOrderStep';
 import type { OrderPreviewInput } from '@/lib/orderInvoicePreview';
-import { Colors, Spacing, Radius, formatCurrency, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, formatCurrency, Typography, Layout, Fonts } from '@/constants/theme';
 import { SearchBar, Button } from '@/components/ui';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -34,11 +34,13 @@ import {
   findCartLineByProductId,
   recalcLine,
   removeFromCart,
+  applyCartLineUpdate,
   setCartLineOrderUnit,
   setCartLineQuantity,
   updateCartQuantity,
   type CartLineInput,
 } from '@/lib/common/utils/cart';
+import { validateLineDiscount } from '@/lib/common/utils/lineDiscount';
 import { formatQuantityDisplay } from '@/lib/common/utils/quantity';
 import {
   computeCartBreakdown,
@@ -89,6 +91,7 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
   const [discountTouched, setDiscountTouched] = useState(false);
   const [showClientSheet, setShowClientSheet] = useState(false);
   const [showProductSheet, setShowProductSheet] = useState(false);
+  const [productSheetPrefill, setProductSheetPrefill] = useState('');
   const [showTempProductSheet, setShowTempProductSheet] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
@@ -197,10 +200,24 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
         product_name: product.name,
         unit_type: product.unit_type,
         unit_price: product.selling_price,
-        discount_percent: product.discount_percent,
+        purchase_price: product.purchase_price,
+        allow_discount: product.allow_discount,
+        max_discount_percent: product.max_discount_percent,
+        stock_quantity: product.stock_quantity,
+        discount_percent: 0,
         tax_percent: product.tax_percent,
       })];
     });
+  };
+
+  const applyLineUpdate = (
+    lineId: string,
+    quantity: number,
+    orderUnit: CartLineInput['order_unit'],
+    discountPercent: number,
+    needsApproval: boolean,
+  ) => {
+    setCart((prev) => applyCartLineUpdate(prev, lineId, quantity, orderUnit, discountPercent, needsApproval));
   };
 
   const changeQty = (lineId: string, delta: number) => {
@@ -284,9 +301,35 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
       return;
     }
 
+    for (const line of cart) {
+      if (line.is_temporary) continue;
+      const v = validateLineDiscount({
+        unitPrice: line.unit_price,
+        purchasePrice: line.purchase_price,
+        discountPercent: line.discount_percent,
+        allowDiscount: line.allow_discount,
+        maxDiscountPercent: line.max_discount_percent,
+        quantity: line.quantity,
+        orderUnit: line.order_unit,
+        priceUnit: line.unit_type,
+        stockQuantity: line.stock_quantity,
+        taxPercent: line.tax_percent,
+      });
+      if (!v.valid && v.error) {
+        const msg =
+          v.error === 'err_max_discount'
+            ? t('err_max_discount').replace('{max}', String(line.max_discount_percent))
+            : t(v.error);
+        Alert.alert(t('required'), `${line.product_name}: ${msg}`);
+        return;
+      }
+    }
+
+    const needsApproval = cart.some((l) => l.needs_discount_approval);
+
     setPlacing(true);
     try {
-      const items: CreateOrderItemInput[] = cart.map(({ line_total: _lt, line_id: _lid, is_temporary: _t, ...rest }) => ({
+      const items: CreateOrderItemInput[] = cart.map(({ line_total: _lt, line_id: _lid, is_temporary: _t, purchase_price: _pp, allow_discount: _ad, max_discount_percent: _md, stock_quantity: _sq, needs_discount_approval: _na, ...rest }) => ({
         product_id: rest.product_id,
         product_name: rest.product_name,
         unit_type: rest.unit_type,
@@ -308,6 +351,7 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
         order_discount_value: discountValidation.value,
         order_discount_amount: orderDiscountAmount,
         save_client_discount: !isInstant,
+        discount_approval_status: needsApproval ? 'pending' : 'none',
       });
       await clearDraft();
       router.replace(`/orders/success?id=${created.id}` as Href);
@@ -472,10 +516,21 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
           totalItems={totalItems}
           onAddToCart={addToCart}
           onChangeQty={changeQty}
-          onSetLineQty={setLineQty}
+          onSetLineQty={applyLineUpdate}
           onRemoveLine={removeItem}
           onNext={() => setStep(3)}
-          onShowProductSheet={() => setShowProductSheet(true)}
+          onShowProductSheet={() => {
+            setProductSheetPrefill(search);
+            setShowProductSheet(true);
+          }}
+          onQuickAddProduct={(prefill) => {
+            setProductSheetPrefill(prefill ?? search);
+            setShowProductSheet(true);
+          }}
+          onProductCreated={(product) => {
+            setProducts((prev) => [product, ...prev.filter((p) => p.id !== product.id)]);
+            addToCart(product);
+          }}
           onShowTempSheet={() => setShowTempProductSheet(true)}
           onRepeatLast={repeatLastItem}
           noProductsFound={noProductsFound}
@@ -627,10 +682,16 @@ export function OrderFlowScreen({ mode = 'standard' }: OrderFlowScreenProps) {
       />
       <QuickAddProductSheet
         visible={showProductSheet}
-        onClose={() => setShowProductSheet(false)}
+        mode="purchase"
+        initialName={productSheetPrefill}
+        onClose={() => {
+          setShowProductSheet(false);
+          setProductSheetPrefill('');
+        }}
         onCreated={(product) => {
           setProducts((prev) => [product, ...prev.filter((p) => p.id !== product.id)]);
           addToCart(product);
+          setSearch('');
         }}
       />
       <QuickAddTempProductSheet
@@ -646,7 +707,7 @@ function SummaryRow({ label, value, bold }: { label: string; value: string; bold
   return (
     <View style={styles.summaryRow}>
       <Text style={{ color: Colors.textSecondary }}>{label}</Text>
-      <Text style={{ fontWeight: bold ? Typography.bold : Typography.semibold, color: Colors.textPrimary }}>{value}</Text>
+      <Text style={{ fontFamily: bold ? Fonts.bold : Fonts.semibold, color: Colors.textPrimary }}>{value}</Text>
     </View>
   );
 }
@@ -669,10 +730,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.amber + '55',
   },
-  quickAddText: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.amberDim },
+  quickAddText: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.amberDim },
   actionRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Layout.screenPaddingH, gap: Spacing.sm, marginBottom: Spacing.sm },
   repeatBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md },
-  repeatText: { fontSize: Typography.xs, fontWeight: Typography.semibold, color: Colors.info },
+  repeatText: { fontSize: Typography.xs, fontFamily: Fonts.semibold, color: Colors.info },
   walkInBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -686,7 +747,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
   },
   walkInText: { flex: 1 },
-  walkInTitle: { fontWeight: Typography.bold, color: Colors.textPrimary, fontSize: Typography.sm },
+  walkInTitle: { fontFamily: Fonts.bold, color: Colors.textPrimary, fontSize: Typography.sm },
   tempAddBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -697,9 +758,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.soft.amber,
     borderRadius: Radius.lg,
   },
-  tempAddText: { flex: 1, fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.amberDim },
+  tempAddText: { flex: 1, fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.amberDim },
   recentSection: { paddingHorizontal: Layout.screenPaddingH, marginBottom: Spacing.sm },
-  recentTitle: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textMuted, marginBottom: Spacing.xs },
+  recentTitle: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textMuted, marginBottom: Spacing.xs },
   recentScroll: { gap: Spacing.sm },
   recentChip: {
     backgroundColor: Colors.surface,
@@ -710,7 +771,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     maxWidth: 140,
   },
-  recentChipName: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.textPrimary },
+  recentChipName: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.textPrimary },
   recentChipPrice: { fontSize: 10, color: Colors.amber, marginTop: 2 },
   row: {
     flexDirection: 'column',
@@ -720,14 +781,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   rowSelected: { borderWidth: 2, borderColor: Colors.amber },
-  rowTitle: { fontWeight: Typography.bold, color: Colors.textPrimary },
+  rowTitle: { fontFamily: Fonts.bold, color: Colors.textPrimary },
   rowMeta: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
-  discountBadge: { fontSize: Typography.xs, color: Colors.success, fontWeight: Typography.semibold, marginTop: 4 },
-  rowAmt: { fontWeight: Typography.bold, color: Colors.amber, marginTop: 4 },
-  tempBadge: { fontSize: Typography.xs, color: Colors.info, fontWeight: Typography.semibold },
+  discountBadge: { fontSize: Typography.xs, color: Colors.success, fontFamily: Fonts.semibold, marginTop: 4 },
+  rowAmt: { fontFamily: Fonts.bold, color: Colors.amber, marginTop: 4 },
+  tempBadge: { fontSize: Typography.xs, color: Colors.info, fontFamily: Fonts.semibold },
   clientBanner: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
     textAlign: 'center',
@@ -750,7 +811,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
-  cartCount: { textAlign: 'center', marginBottom: Spacing.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  cartCount: { textAlign: 'center', marginBottom: Spacing.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   summaryBox: {
     backgroundColor: Colors.surface,
     padding: Spacing.md,
@@ -759,7 +820,7 @@ const styles = StyleSheet.create({
   },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   remaining: {
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.danger,
     textAlign: 'center',
     marginBottom: Spacing.md,

@@ -14,7 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { WalkthroughColors, WalkthroughGradients } from '@/constants/walkthroughTheme';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing, Typography, Fonts } from '@/constants/theme';
 import {
   ClientsWalkthroughMockup,
   ProductsWalkthroughMockup,
@@ -230,13 +230,13 @@ const styles = StyleSheet.create({
   brandText: {
     color: WalkthroughColors.textPrimary,
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
   },
   skipBtn: { paddingVertical: 6, paddingHorizontal: 4 },
   skipText: {
     color: WalkthroughColors.textMuted,
     fontSize: Typography.sm,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   pager: { flex: 1 },
   slide: { flex: 1 },
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   title: {
     color: WalkthroughColors.textPrimary,
     fontSize: Typography.lg,
-    fontWeight: Typography.extrabold,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   featureText: {
     color: WalkthroughColors.textSecondary,
     fontSize: 11,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   cta: { borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.sm },
   ctaGradient: {
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   ctaText: {
     color: WalkthroughColors.bg,
     fontSize: Typography.md,
-    fontWeight: Typography.extrabold,
+    fontFamily: Fonts.bold,
   },
   loginHint: {
     textAlign: 'center',

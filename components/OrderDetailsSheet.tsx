@@ -7,7 +7,7 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, Radius, Shadow, Gradients, formatCurrency, formatDate } from '@/constants/theme';
+import { Colors, Typography, Spacing, Radius, Shadow, Gradients, formatCurrency, formatDate, Fonts } from '@/constants/theme';
 import type { Order } from '@/types';
 
 import { useLanguage } from '@/hooks/useLanguage';
@@ -416,12 +416,12 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     fontSize: Typography.xl,
-    fontWeight: Typography.black,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   storeName: {
     fontSize: Typography.md,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textSecondary,
     marginBottom: 2,
   },
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -452,16 +452,16 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: Typography.base,
     color: Colors.textPrimary,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   itemQty: {
     fontSize: Typography.sm,
     color: Colors.textSecondary,
-    fontWeight: Typography.regular,
+    fontFamily: Fonts.regular,
   },
   itemPrice: {
     fontSize: Typography.base,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   // Edit Mode Builder
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: Colors.border, marginBottom: 8 
   },
   headerCell: { 
-    fontSize: 10, fontWeight: '900', color: Colors.textMuted, 
+    fontSize: 10, fontFamily: Fonts.bold, color: Colors.textMuted, 
     textTransform: 'uppercase' 
   },
   addRowBtn: { 
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed', borderWidth: 1, borderColor: Colors.amber, 
     borderRadius: Radius.md, justifyContent: 'center', marginTop: 12 
   },
-  addRowText: { color: Colors.amber, fontWeight: 'bold' },
+  addRowText: { color: Colors.amber, fontFamily: Fonts.bold },
   
   financeBox: {
     gap: 4,
@@ -495,17 +495,17 @@ const styles = StyleSheet.create({
   },
   financeValue: {
     fontSize: Typography.sm,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
   },
   totalLabel: {
     fontSize: Typography.md,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   totalValue: {
     fontSize: Typography.lg,
-    fontWeight: Typography.black,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   ledgerLink: {
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   },
   ledgerLinkText: {
     color: '#3B82F6', // Indigo/Blue
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
   },
   btnRow: {
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   },
   payFullText: {
     color: Colors.white,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     fontSize: Typography.sm,
   },
   cancelBtn: { 
@@ -544,22 +544,22 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', 
     backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border 
   },
-  cancelText: { fontWeight: 'bold', color: Colors.textSecondary },
+  cancelText: { fontFamily: Fonts.bold, color: Colors.textSecondary },
   saveBtn: { 
     flex: 2, height: 50, borderRadius: Radius.full, overflow: 'hidden' 
   },
   saveGrad: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  saveText: { color: Colors.white, fontWeight: '900' },
+  saveText: { color: Colors.white, fontFamily: Fonts.bold },
   
   // Store Picker
   storePickerTrigger: {
     flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, backgroundColor: Colors.bg, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border,
   },
-  storePickerLabel: { fontSize: 12, fontWeight: 'bold', color: Colors.textMuted },
-  storePickerValue: { flex: 1, fontSize: 13, fontWeight: 'bold', color: Colors.amber },
+  storePickerLabel: { fontSize: 12, fontFamily: Fonts.bold, color: Colors.textMuted },
+  storePickerValue: { flex: 1, fontSize: 13, fontFamily: Fonts.bold, color: Colors.amber },
   storePickerDropdown: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.border },
   storeOption: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border, marginRight: 8 },
   storeOptionActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
   storeOptionText: { fontSize: 12, color: Colors.textSecondary },
-  storeOptionActiveText: { color: Colors.white, fontWeight: 'bold' },
+  storeOptionActiveText: { color: Colors.white, fontFamily: Fonts.bold },
 });

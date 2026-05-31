@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { FormField } from '@/lib/common/components/FormField';
-import { Colors, Spacing, Radius, Typography, formatCurrency } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, formatCurrency, Fonts } from '@/constants/theme';
 import type { OrderDiscountType } from '@/lib/common/utils/orderDiscount';
 
 export interface OrderDiscountSectionProps {
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
   },
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeChipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  typeChipText: { fontSize: Typography.xs, fontWeight: Typography.semibold, color: Colors.textSecondary },
+  typeChipText: { fontSize: Typography.xs, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   typeChipTextActive: { color: Colors.white },
   applied: {
     fontSize: Typography.xs,
     color: Colors.success,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     marginBottom: Spacing.sm,
   },
   breakdown: {
@@ -162,6 +162,6 @@ const styles = StyleSheet.create({
   },
   breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   breakdownLabel: { fontSize: Typography.xs, color: Colors.textSecondary },
-  breakdownValue: { fontSize: Typography.xs, color: Colors.textPrimary, fontWeight: Typography.semibold },
-  breakdownBold: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.amber },
+  breakdownValue: { fontSize: Typography.xs, color: Colors.textPrimary, fontFamily: Fonts.semibold },
+  breakdownBold: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.amber },
 });

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { FormField } from '@/lib/common/components/FormField';
 import { Button } from '@/components/ui';
-import { Colors, Spacing, Radius, Shadow, Gradients, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, Typography, Fonts } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LANGUAGES, Locale } from '@/constants/translations';
@@ -152,10 +152,10 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.white,
   },
-  avatarInitials: { fontSize: 28, fontWeight: '900', color: Colors.white },
+  avatarInitials: { fontSize: 28, fontFamily: Fonts.bold, color: Colors.white },
   sectionLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -173,6 +173,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   langChipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  langChipText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
+  langChipText: { fontSize: 13, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   langChipTextActive: { color: Colors.white },
 });

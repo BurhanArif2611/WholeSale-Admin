@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHeader } from '@/lib/common/components/ScreenHeader';
-import { Colors, Spacing, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Typography, Layout, Fonts } from '@/constants/theme';
 
 interface ScreenLayoutProps {
   title: string;
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: Typography.lg,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.danger,
     marginBottom: Spacing.xs,
   },

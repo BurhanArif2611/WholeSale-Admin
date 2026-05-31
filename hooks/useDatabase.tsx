@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getDatabase, repairDatabase } from '@/lib/core/database';
+import { subscribeDatabaseReset } from '@/lib/core/databaseReset';
 
 interface DatabaseContextValue {
   isReady: boolean;
@@ -14,6 +15,12 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    return subscribeDatabaseReset(() => {
+      setRefreshKey((k) => k + 1);
+    });
+  }, []);
 
   useEffect(() => {
     let mounted = true;

@@ -6,7 +6,7 @@ import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { FormField } from '@/lib/common/components/FormField';
 import { CategoryPicker } from '@/lib/common/components/CategoryPicker';
 import { Button } from '@/components/ui';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useCategories } from '@/hooks/useCategories';
 import { productRepository } from '@/lib/data/repositories/productRepository';
@@ -35,7 +35,8 @@ export default function NewProductScreen() {
   const [stockQty, setStockQty] = useState('');
   const [minAlert, setMinAlert] = useState('');
   const [taxPercent, setTaxPercent] = useState('');
-  const [discountPercent, setDiscountPercent] = useState('');
+  const [allowDiscount, setAllowDiscount] = useState(false);
+  const [maxDiscountPercent, setMaxDiscountPercent] = useState('10');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [nameTouched, setNameTouched] = useState(false);
@@ -82,8 +83,12 @@ export default function NewProductScreen() {
         expiry_date: null,
         image_uri: null,
         tax_percent: parseFloat(taxPercent) || 0,
-        discount_percent: parseFloat(discountPercent) || 0,
+        discount_percent: 0,
+        allow_discount: allowDiscount,
+        max_discount_percent: allowDiscount ? parseFloat(maxDiscountPercent) || 0 : 0,
         notes: notes || null,
+        brand: null,
+        is_incomplete: false,
       });
       refresh();
       router.back();
@@ -181,13 +186,31 @@ export default function NewProductScreen() {
         placeholder={t('ph_tax_percent')}
         keyboardType="numeric"
       />
-      <FormField
-        label="Discount %"
-        value={discountPercent}
-        onChangeText={setDiscountPercent}
-        placeholder={t('ph_discount_percent')}
-        keyboardType="numeric"
-      />
+      <Text style={styles.unitLabel}>{t('allow_discount_label')}</Text>
+      <View style={styles.toggleRow}>
+        <Pressable
+          style={[styles.toggleChip, !allowDiscount && styles.toggleChipActive]}
+          onPress={() => setAllowDiscount(false)}
+        >
+          <Text style={[styles.toggleChipText, !allowDiscount && styles.toggleChipTextActive]}>{t('off')}</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.toggleChip, allowDiscount && styles.toggleChipActive]}
+          onPress={() => setAllowDiscount(true)}
+        >
+          <Text style={[styles.toggleChipText, allowDiscount && styles.toggleChipTextActive]}>{t('on')}</Text>
+        </Pressable>
+      </View>
+      {allowDiscount ? (
+        <FormField
+          label={t('max_discount_label')}
+          value={maxDiscountPercent}
+          onChangeText={setMaxDiscountPercent}
+          placeholder="10"
+          keyboardType="numeric"
+          hint={t('max_discount_hint')}
+        />
+      ) : null}
       <FormField
         label={t('notes_optional')}
         value={notes}
@@ -212,7 +235,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.danger + '35',
   },
   catErrorText: { color: Colors.danger, fontSize: 12, marginBottom: 6 },
-  catRetry: { color: Colors.amber, fontWeight: '700', fontSize: 12 },
+  catRetry: { color: Colors.amber, fontFamily: Fonts.bold, fontSize: 12 },
   sectionHint: {
     fontSize: 12,
     color: Colors.textMuted,
@@ -220,7 +243,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     fontStyle: 'italic',
   },
-  unitLabel: { fontSize: 12, fontWeight: '700', color: Colors.textSecondary, marginBottom: 6 },
+  unitLabel: { fontSize: 12, fontFamily: Fonts.bold, color: Colors.textSecondary, marginBottom: 6 },
   unitRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Spacing.md },
   unitChip: {
     paddingHorizontal: 12,
@@ -231,6 +254,19 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   unitChipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  unitChipText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
+  unitChipText: { fontSize: 12, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   unitChipTextActive: { color: Colors.white },
+  toggleRow: { flexDirection: 'row', gap: 8, marginBottom: Spacing.md },
+  toggleChip: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+  },
+  toggleChipActive: { backgroundColor: Colors.amberBg, borderColor: Colors.amber },
+  toggleChipText: { fontSize: 13, fontFamily: Fonts.semibold, color: Colors.textSecondary },
+  toggleChipTextActive: { color: Colors.amberDim },
 });

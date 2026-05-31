@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, formatCurrency, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, formatCurrency, Layout, Fonts } from '@/constants/theme';
 import { SearchBar, EmptyState } from '@/components/ui';
 import { FAB } from '@/lib/common/components/FAB';
 import { ListCard } from '@/lib/common/components/ListCard';
@@ -157,11 +157,11 @@ const styles = StyleSheet.create({
   filters: { flexDirection: 'row', paddingHorizontal: Layout.screenPaddingH, gap: 8, marginBottom: Spacing.sm },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: Radius.full, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border },
   chipActive: { backgroundColor: Colors.amber, borderColor: Colors.amber },
-  chipText: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
+  chipText: { fontSize: 12, fontFamily: Fonts.semibold, color: Colors.textSecondary },
   chipTextActive: { color: Colors.white },
   list: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: Layout.screenPaddingBottom },
   cancelLink: { marginTop: -6, marginBottom: Spacing.sm, alignSelf: 'flex-end', paddingRight: Spacing.sm },
-  cancel: { fontSize: 11, color: Colors.danger, fontWeight: '700' },
+  cancel: { fontSize: 11, color: Colors.danger, fontFamily: Fonts.bold },
   quickActions: { flexDirection: 'row', gap: 4, marginLeft: Spacing.xs },
   quickBtn: {
     width: 36,

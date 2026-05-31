@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheet } from '@/lib/common/components/BottomSheet';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Fonts } from '@/constants/theme';
 import type { ReceiptData } from '@/lib/receipt/receiptTypes';
 import {
   printReceipt,
@@ -158,6 +158,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   optionText: { flex: 1 },
-  optionLabel: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  optionLabel: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   optionSub: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
 });

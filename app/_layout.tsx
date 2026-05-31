@@ -7,11 +7,19 @@ import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { DatabaseProvider } from '@/hooks/useDatabase';
 import { BusinessCategoriesProvider } from '@/hooks/useBusinessCategories';
 import * as Font from 'expo-font';
+import {
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import * as SplashScreen from 'expo-splash-screen';
 import { DashboardSkeleton } from '@/components/ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Colors } from '@/constants/theme';
+import { setupTypography } from '@/lib/typography/setupTypography';
 import { StatusBar } from 'expo-status-bar';
 import { isWalkthroughComplete } from '@/lib/onboarding/walkthroughStorage';
 
@@ -27,14 +35,24 @@ LogBox.ignoreLogs(['Setting a timer', 'AsyncStorage has been extracted']);
  */
 export default function RootLayout() {
   console.log('🚀 [RootLayout] Mounting...');
-  const [fontsLoaded, fontError] = Font.useFonts({ ...Ionicons.font });
+  const [fontsLoaded, fontError] = Font.useFonts({
+    ...Ionicons.font,
+    Poppins_300Light,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
 
   useEffect(() => {
+    if (fontsLoaded) {
+      setupTypography();
+    }
     if (fontError) {
       console.warn('[RootLayout] Font loading error:', fontError);
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fontError]);
+  }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) return null;
 
@@ -57,7 +75,7 @@ export default function RootLayout() {
 function BusinessCategoriesGate() {
   const { user } = useAuth();
   return (
-    <BusinessCategoriesProvider userId={user?.id}>
+    <BusinessCategoriesProvider userId={user?.id} key={user?.id ?? 'logged-out'}>
       <RootLayoutNav />
     </BusinessCategoriesProvider>
   );
@@ -186,6 +204,8 @@ function RootLayoutNav() {
         <Stack.Screen name="clients/new" />
         <Stack.Screen name="clients/[id]" />
         <Stack.Screen name="products/new" />
+        <Stack.Screen name="products/incomplete" />
+        <Stack.Screen name="products/complete/[id]" />
         <Stack.Screen name="products/[id]" />
         <Stack.Screen name="orders/new" />
         <Stack.Screen name="orders/instant" />

@@ -14,7 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Print from 'expo-print';
-import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { FormField } from '@/lib/common/components/FormField';
 import { formatQuantityDisplay, unitLabel } from '@/lib/common/utils/quantity';
 import { buildOrderShareText, generateOrderPreviewHtml, type OrderPreviewInput } from '@/lib/orderInvoicePreview';
@@ -498,7 +498,7 @@ function FooterChip({
 
 const badgeStyles = StyleSheet.create({
   wrap: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
-  text: { fontSize: 10, fontWeight: Typography.bold },
+  text: { fontSize: 10, fontFamily: Fonts.bold },
 });
 
 const cardStyles = StyleSheet.create({
@@ -530,7 +530,7 @@ const cardStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  title: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   body: { padding: Spacing.md },
 });
 
@@ -549,15 +549,15 @@ const productStyles = StyleSheet.create({
   info: { flex: 1 },
   nameRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, alignItems: 'center' },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4, marginBottom: 4 },
-  name: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary, flex: 1 },
+  name: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary, flex: 1 },
   calc: { fontSize: Typography.xs, color: Colors.textSecondary, lineHeight: 18 },
-  total: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.amber },
+  total: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.amber },
 });
 
 const priceRowStyles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   label: { fontSize: Typography.xs, color: Colors.textSecondary },
-  value: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  value: { fontSize: Typography.sm, fontFamily: Fonts.semibold, color: Colors.textPrimary },
 });
 
 const footerStyles = StyleSheet.create({
@@ -578,10 +578,10 @@ const footerStyles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: Radius.full,
   },
-  primaryText: { color: Colors.white, fontSize: Typography.md, fontWeight: Typography.black },
+  primaryText: { color: Colors.white, fontSize: Typography.md, fontFamily: Fonts.bold },
   secondaryRow: { flexDirection: 'row', justifyContent: 'space-between' },
   chip: { alignItems: 'center', flex: 1, paddingVertical: Spacing.xs },
-  chipLabel: { fontSize: 10, fontWeight: Typography.semibold, color: Colors.textMuted, marginTop: 4 },
+  chipLabel: { fontSize: 10, fontFamily: Fonts.semibold, color: Colors.textMuted, marginTop: 4 },
 });
 
 const styles = StyleSheet.create({
@@ -594,13 +594,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { color: Colors.white, fontSize: Typography.md, fontWeight: Typography.black },
+  avatarText: { color: Colors.white, fontSize: Typography.md, fontFamily: Fonts.bold },
   clientInfo: { flex: 1 },
-  clientName: { fontSize: Typography.md, fontWeight: Typography.bold, color: Colors.textPrimary },
+  clientName: { fontSize: Typography.md, fontFamily: Fonts.bold, color: Colors.textPrimary },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 },
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
-  contactText: { fontSize: Typography.sm, color: Colors.success, fontWeight: Typography.semibold },
+  contactText: { fontSize: Typography.sm, color: Colors.success, fontFamily: Fonts.semibold },
   addressText: { fontSize: Typography.xs, color: Colors.textSecondary, flex: 1 },
   metaText: { fontSize: Typography.xs, color: Colors.textMuted },
   outstandingBox: {
@@ -612,13 +612,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   outstandingLabel: { fontSize: Typography.xs, color: Colors.danger },
-  outstandingValue: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.danger },
-  sectionMeta: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.amber },
+  outstandingValue: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.danger },
+  sectionMeta: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.amber },
   divider: { height: 1, backgroundColor: Colors.borderLight, marginVertical: Spacing.sm },
   showMore: {
     textAlign: 'center',
     color: Colors.amber,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     fontSize: Typography.xs,
     marginTop: Spacing.sm,
   },
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   },
   deliveryChipActive: { borderColor: Colors.amber, backgroundColor: Colors.amberBg },
   deliveryChipDisabled: { opacity: 0.4 },
-  deliveryChipText: { fontSize: Typography.xs, color: Colors.textSecondary, fontWeight: Typography.semibold },
+  deliveryChipText: { fontSize: Typography.xs, color: Colors.textSecondary, fontFamily: Fonts.semibold },
   deliveryChipTextActive: { color: Colors.amberDim },
   deliveryMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: Spacing.md },
   payMethodRow: {
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface2,
     borderRadius: Radius.md,
   },
-  payMethodText: { flex: 1, fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  payMethodText: { flex: 1, fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radius.full,
   },
-  statusText: { fontSize: 11, fontWeight: Typography.bold },
+  statusText: { fontSize: 11, fontFamily: Fonts.bold },
   priceRows: { gap: 2 },
   priceDivider: { height: 1, backgroundColor: Colors.border, marginVertical: Spacing.sm },
   totalHero: {
@@ -667,14 +667,14 @@ const styles = StyleSheet.create({
   totalLabel: {
     color: 'rgba(255,255,255,0.75)',
     fontSize: Typography.xs,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   totalValue: {
     color: Colors.white,
     fontSize: 36,
-    fontWeight: Typography.black,
+    fontFamily: Fonts.bold,
     marginVertical: Spacing.sm,
   },
   discountTag: {
@@ -686,5 +686,5 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radius.full,
   },
-  discountTagText: { color: Colors.amberLight, fontSize: 11, fontWeight: Typography.semibold },
+  discountTagText: { color: Colors.amberLight, fontSize: 11, fontFamily: Fonts.semibold },
 });

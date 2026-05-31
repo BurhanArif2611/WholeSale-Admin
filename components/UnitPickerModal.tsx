@@ -5,7 +5,7 @@ import {
   FlatList, StyleSheet, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Shadow, Typography, Spacing } from '@/constants/theme';
+import { Colors, Radius, Shadow, Typography, Spacing, Fonts } from '@/constants/theme';
 
 export interface UnitOption {
   label: string; // e.g. "KILOGRAMS"
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.lg,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   addNewBtn: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   addNewText: {
     fontSize: Typography.base,
     color: Colors.amber,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   divider: {
     height: 1,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   unitLabelActive: {
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.amber,
   },
 
@@ -248,13 +248,13 @@ const styles = StyleSheet.create({
   },
   dialogTitle: {
     fontSize: Typography.lg,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.lg,
   },
   dialogLabel: {
     fontSize: 12,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textSecondary,
     marginBottom: 6,
     marginTop: Spacing.sm,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   dialogCancelText: {
     fontSize: Typography.base,
     color: Colors.textSecondary,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
   },
   dialogAddBtn: {
     flex: 1,
@@ -297,6 +297,6 @@ const styles = StyleSheet.create({
   dialogAddText: {
     fontSize: Typography.base,
     color: Colors.black,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
   },
 });

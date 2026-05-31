@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, formatCurrency, Typography, Fonts } from '@/constants/theme';
 import { QuantitySelector } from '@/lib/common/components/QuantitySelector';
 import { CategoryBadge } from '@/lib/common/components/CategoryBadge';
+import { IncompleteProductBadge } from '@/lib/common/components/IncompleteProductBadge';
 import type { Product } from '@/lib/domain/models';
 
 interface ProductCardProps {
@@ -30,7 +31,12 @@ export function ProductCard({
 
   return (
     <TouchableOpacity
-      style={[styles.card, lowStock && styles.cardLow, inCart && styles.cardInCart]}
+      style={[
+        styles.card,
+        lowStock && styles.cardLow,
+        inCart && styles.cardInCart,
+        product.is_incomplete && styles.cardIncomplete,
+      ]}
       onPress={onPress}
       activeOpacity={onPress ? 0.85 : 1}
       disabled={!onPress}
@@ -39,6 +45,7 @@ export function ProductCard({
         <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
         <View style={styles.badgeRow}>
           <CategoryBadge name={product.category} compact />
+          {product.is_incomplete ? <IncompleteProductBadge compact /> : null}
         </View>
         {product.sku ? <Text style={styles.meta}>SKU: {product.sku}</Text> : null}
         <Text style={styles.price}>
@@ -79,12 +86,13 @@ const styles = StyleSheet.create({
   },
   cardLow: { borderColor: Colors.danger + '44' },
   cardInCart: { borderColor: Colors.amber, borderWidth: 2 },
+  cardIncomplete: { borderColor: Colors.amber + '88', backgroundColor: Colors.amberBg + '44' },
   body: { flex: 1, paddingRight: Spacing.sm },
-  name: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
-  badgeRow: { marginTop: 4, marginBottom: 2 },
+  name: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 4, marginBottom: 2 },
   meta: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
-  price: { fontSize: Typography.xs, color: Colors.amber, fontWeight: Typography.bold, marginTop: 4 },
-  stock: { fontSize: Typography.xs, fontWeight: Typography.semibold, color: Colors.textSecondary, marginTop: 2 },
+  price: { fontSize: Typography.xs, color: Colors.amber, fontFamily: Fonts.bold, marginTop: 4 },
+  stock: { fontSize: Typography.xs, fontFamily: Fonts.semibold, color: Colors.textSecondary, marginTop: 2 },
   actions: { justifyContent: 'center', alignItems: 'flex-end', gap: Spacing.xs },
   addBtn: {
     backgroundColor: Colors.amber,
@@ -92,5 +100,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
   },
-  addText: { color: Colors.white, fontWeight: Typography.bold, fontSize: Typography.xs },
+  addText: { color: Colors.white, fontFamily: Fonts.bold, fontSize: Typography.xs },
 });

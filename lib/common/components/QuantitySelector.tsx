@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography, Layout, Fonts } from '@/constants/theme';
 
 interface QuantitySelectorProps {
   value: number;
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     minWidth: 28,
     textAlign: 'center',
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   qtyCompact: { minWidth: 22, fontSize: Typography.xs },

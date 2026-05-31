@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, Text, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
+import { Colors, Radius, Shadow, Spacing, Typography, Fonts } from '@/constants/theme';
 
 interface ModuleCardProps {
   title: string;
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sm,
-    fontWeight: '800',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     letterSpacing: -0.2,
   },
@@ -78,5 +78,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.white,
   },
-  badgeText: { color: Colors.white, fontSize: 10, fontWeight: '800' },
+  badgeText: { color: Colors.white, fontSize: 10, fontFamily: Fonts.bold },
 });

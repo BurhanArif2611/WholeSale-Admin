@@ -1,4 +1,4 @@
-export type UnitType = 'kg' | 'gram' | 'liter' | 'ml' | 'piece' | 'box' | 'packet' | 'meter';
+export type UnitType = 'kg' | 'gram' | 'liter' | 'ml' | 'piece' | 'box' | 'packet' | 'carton' | 'meter';
 export type OrderDiscountType = 'percent' | 'fixed';
 export type PaymentStatus = 'pending' | 'partial' | 'paid';
 export type OrderStatus = 'new' | 'confirmed' | 'delivered' | 'cancelled' | 'returned';
@@ -51,7 +51,13 @@ export interface Product {
   image_uri: string | null;
   tax_percent: number;
   discount_percent: number;
+  /** Whether line-item discounts are allowed during orders */
+  allow_discount: boolean;
+  /** Maximum discount % allowed when allow_discount is true */
+  max_discount_percent: number;
   notes: string | null;
+  brand: string | null;
+  is_incomplete: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -75,6 +81,7 @@ export interface Order {
   delivery_date: string | null;
   delivery_address: string | null;
   notes: string | null;
+  discount_approval_status: 'none' | 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
 }
@@ -126,6 +133,8 @@ export interface DashboardStats {
   todaySales: number;
   pendingAmount: number;
   lowStockCount: number;
+  incompleteProductCount: number;
+  pendingDiscountApprovalCount: number;
   recentOrders: Order[];
 }
 

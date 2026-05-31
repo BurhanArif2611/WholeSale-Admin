@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Alert, Text } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, Alert, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadow, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Typography, Layout, Fonts } from '@/constants/theme';
 import { EmptyState } from '@/components/ui';
 import { FAB } from '@/lib/common/components/FAB';
 import { ProductFilterBar } from '@/lib/common/components/ProductFilterBar';
@@ -26,20 +26,23 @@ export default function ProductsScreen() {
   const [sortBy, setSortBy] = useState<ProductSortField>('name');
   const [sortDir, setSortDir] = useState<SortDirection>('asc');
   const [loading, setLoading] = useState(true);
+  const [incompleteProducts, setIncompleteProducts] = useState<Product[]>([]);
 
   const load = useCallback(async () => {
     if (!isReady) return;
     setLoading(true);
-    const [data, cats] = await Promise.all([
+    const [data, cats, incomplete] = await Promise.all([
       productRepository.findAll(search, categoryId || '', {
         sortBy,
         sortDir,
         ...productQueryOptions(categoryId, search),
       }),
       categoryRepository.findAll(),
+      productRepository.findIncomplete(),
     ]);
     setProducts(data);
     setCategories(filterCategoryList(cats));
+    setIncompleteProducts(incomplete);
     setLoading(false);
   }, [isReady, search, categoryId, sortBy, sortDir, refreshKey, productQueryOptions, filterCategoryList]);
 
@@ -89,6 +92,27 @@ export default function ProductsScreen() {
         contentContainerStyle={styles.list}
         refreshing={loading}
         onRefresh={load}
+        ListHeaderComponent={
+          incompleteProducts.length > 0 && !search.trim() ? (
+            <View style={styles.incompleteSection}>
+              <View style={styles.incompleteHeader}>
+                <Text style={styles.incompleteTitle}>
+                  {t('products_needing_details_count').replace('{count}', String(incompleteProducts.length))}
+                </Text>
+                <Pressable onPress={() => router.push('/products/incomplete')}>
+                  <Text style={styles.seeAll}>{t('see_all')}</Text>
+                </Pressable>
+              </View>
+              {incompleteProducts.slice(0, 3).map((item) => (
+                <ProductCard
+                  key={item.id}
+                  product={item}
+                  onPress={() => router.push(`/products/complete/${item.id}`)}
+                />
+              ))}
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           <EmptyState
             icon="cube-outline"
@@ -103,7 +127,11 @@ export default function ProductsScreen() {
           <ProductCard
             product={item}
             lowStock={item.stock_quantity <= item.min_stock_alert}
-            onPress={() => router.push(`/products/${item.id}`)}
+            onPress={() =>
+              item.is_incomplete
+                ? router.push(`/products/complete/${item.id}`)
+                : router.push(`/products/${item.id}`)
+            }
             rightElement={
               <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Ionicons name="ellipsis-vertical" size={18} color={Colors.textMuted} />
@@ -121,6 +149,21 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   toolbar: { paddingHorizontal: Layout.screenPaddingH, paddingTop: Spacing.md, paddingBottom: Spacing.sm },
   manageLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', paddingBottom: Spacing.xs },
-  manageText: { fontSize: Typography.xs, color: Colors.amber, fontWeight: Typography.semibold },
+  manageText: { fontSize: Typography.xs, color: Colors.amber, fontFamily: Fonts.semibold },
   list: { paddingHorizontal: Layout.screenPaddingH, paddingBottom: Layout.screenPaddingBottom },
+  incompleteSection: { marginBottom: Spacing.md },
+  incompleteHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+  },
+  incompleteTitle: {
+    fontSize: Typography.xs,
+    fontFamily: Fonts.bold,
+    color: Colors.amberDim,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  seeAll: { fontSize: Typography.xs, fontFamily: Fonts.bold, color: Colors.amber },
 });

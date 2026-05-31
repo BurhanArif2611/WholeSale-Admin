@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { PromptModal } from '@/lib/common/components/PromptModal';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
-import { Colors, Spacing, Radius, Shadow, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Typography, Layout, Fonts } from '@/constants/theme';
 import { EmptyState, SectionHeader } from '@/components/ui';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   segmentBtnActive: { backgroundColor: Colors.amber },
   segmentText: {
     fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textMuted,
   },
   segmentTextActive: { color: Colors.white },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   cardBody: { flex: 1 },
   name: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
   },
   meta: {

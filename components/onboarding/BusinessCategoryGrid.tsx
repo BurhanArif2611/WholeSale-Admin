@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadow, Gradients, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Gradients, Typography, Fonts } from '@/constants/theme';
 import { iconForCategorySlug } from '@/lib/domain/categoryIcons';
 import type { Category } from '@/lib/domain/models';
 
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: Typography.xs,
     color: Colors.textMuted,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     marginBottom: Spacing.sm,
   },
   list: { paddingBottom: Spacing.xl },
@@ -186,13 +186,13 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 10,
-    fontWeight: Typography.semibold,
+    fontFamily: Fonts.semibold,
     color: Colors.textSecondary,
     textAlign: 'center',
   },
   cardLabelSelected: {
     fontSize: 10,
-    fontWeight: Typography.bold,
+    fontFamily: Fonts.bold,
     color: Colors.white,
     textAlign: 'center',
   },

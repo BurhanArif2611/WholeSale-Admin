@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenLayout } from '@/lib/common/components/ScreenLayout';
 import { FAB } from '@/lib/common/components/FAB';
 import { EmptyState } from '@/components/ui';
-import { Colors, Spacing, Radius, Shadow, Typography, Layout } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadow, Typography, Layout, Fonts } from '@/constants/theme';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useDatabase } from '@/hooks/useDatabase';
 import { categoryRepository } from '@/lib/data/repositories/categoryRepository';
@@ -136,16 +136,16 @@ const styles = StyleSheet.create({
   },
   body: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flexWrap: 'wrap' },
-  name: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textPrimary },
+  name: { fontSize: Typography.sm, fontFamily: Fonts.bold, color: Colors.textPrimary },
   presetBadge: {
     backgroundColor: Colors.amberBg,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: Radius.sm,
   },
-  presetText: { fontSize: 9, fontWeight: Typography.bold, color: Colors.amberDim, textTransform: 'uppercase' },
+  presetText: { fontSize: 9, fontFamily: Fonts.bold, color: Colors.amberDim, textTransform: 'uppercase' },
   desc: { fontSize: Typography.xs, color: Colors.textMuted, marginTop: 2 },
-  count: { fontSize: Typography.xs, color: Colors.textSecondary, marginTop: 4, fontWeight: Typography.semibold },
+  count: { fontSize: Typography.xs, color: Colors.textSecondary, marginTop: 4, fontFamily: Fonts.semibold },
   deleteBtn: { padding: Spacing.xs },
   errorBox: {
     marginHorizontal: Layout.screenPaddingH,
@@ -158,5 +158,5 @@ const styles = StyleSheet.create({
   },
   errorText: { color: Colors.danger, fontSize: Typography.sm, marginBottom: Spacing.sm },
   retryBtn: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 12 },
-  retryText: { color: Colors.amber, fontWeight: '700', fontSize: Typography.sm },
+  retryText: { color: Colors.amber, fontFamily: Fonts.bold, fontSize: Typography.sm },
 });
